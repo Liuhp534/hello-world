@@ -1,0 +1,80 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>cn.liuhp.project</groupId>
+  <artifactId>oneday</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>oneday</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+		<!-- spring -->
+		<spring.version>4.2.0.RELEASE</spring.version>
+		<spring-amqp.version>1.4.5.RELEASE</spring-amqp.version>
+		<spring.retry.version>1.1.3.RELEASE</spring.retry.version>
+
+		<!-- mybatis -->
+		<mybatis.version>3.1.1</mybatis.version>
+		<mybatis-spring.version>1.1.1</mybatis-spring.version>
+
+		<!-- mysql -->
+		<mysql.version>5.1.35</mysql.version>
+		<pinyin4j.version>2.5.0</pinyin4j.version>
+		<poi.version>3.14</poi.version>
+		<spring.hbasic.version>4.3.4.RELEASE</spring.hbasic.version>
+		<jackson-databind.hbasic.version>2.8.4</jackson-databind.hbasic.version>
+		<httpclient.hbasic.version>4.5.2</httpclient.hbasic.version>
+	</properties>
+
+  <dependencies>
+	<dependency>
+		<groupId>com.alibaba</groupId>
+		<artifactId>fastjson</artifactId>
+		<version>1.2.47</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.httpcomponents</groupId>
+		<artifactId>httpclient</artifactId>
+		<version>${httpclient.hbasic.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>com.fasterxml.jackson.core</groupId>
+		<artifactId>jackson-core</artifactId>
+		<version>${jackson-databind.hbasic.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>com.fasterxml.jackson.core</groupId>
+		<artifactId>jackson-core</artifactId>
+		<version>${jackson-databind.hbasic.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-core</artifactId>
+		<version>${spring.hbasic.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.poi</groupId>
+		<artifactId>poi</artifactId>
+		<version>${poi.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>com.belerweb</groupId>
+		<artifactId>pinyin4j</artifactId>
+		<version>${pinyin4j.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>3.8.1</version>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+		<version>${mysql.version}</version>
+	</dependency>
+</dependencies>
+</project>
