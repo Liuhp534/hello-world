@@ -58,30 +58,15 @@ public class AnnotationTest {
 	    Class<?> c = Class.forName(className);
 	    Method[] methods = c.getDeclaredMethods();
 	    for (int i = 0; i < methods.length; i++) {
-		/*if (methods[i].isAnnotationPresent(Test.class)) {
+		if (methods[i].isAnnotationPresent(Test.class)) {
 		    testCount ++;
 		    try {
 			methods[i].invoke(new AnnotationTest());
 		    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			errorCount ++;
 		    }
-		}*/
-		if (methods[i].isAnnotationPresent(ExceptionTest.class)) {
-		    testCount ++;
-		    try {
-			methods[i].invoke(new AnnotationTest());
-		    } catch (Throwable wrappedExp) {//Throwable 可以包装异常
-			Throwable exc = wrappedExp.getCause();
-			Class<? extends Exception>[] excTypes = methods[i].getAnnotation(ExceptionTest.class).value();//方法获取其注解，进而获取注解中的信息
-			for (Class<? extends Exception> cl : excTypes) {//判断
-			    if (cl.isInstance(exc)) {
-				System.out.println(exc.getMessage());
-				System.out.println(methods[i].getName() + " is the " + c.getName());
-			    }
-			}
-			errorCount ++;
-		    }
 		}
+		
 	    }
 	} catch (ClassNotFoundException e) {
 	    e.printStackTrace();

@@ -7,17 +7,22 @@
  * you entered into with Huize,http://www.huize.com.
  *  
  */   
-package cn.liu.hui.peng.newobj; 
+package cn.liu.hui.peng.effective.builder; 
 
 /**
+ * 构建起构建对象
+ * 
  * @author	hz16092620 
  * @date	2018年7月11日 上午11:39:10
  * @version      
  */
-public class DogBuild {
+public class Dog {
     
     public static void main(String[] args) {
 	//DogBuild test = new DogBuild.Builder().age(10).name("loge").height(10).sex(1).width(10).build();
+	IBuilder<Dog> builder = new Builder("dogname");
+	Dog obj = builder.build();
+	System.out.println(obj.getName());
     }
     
     private String name;
@@ -30,15 +35,19 @@ public class DogBuild {
     
     private int width;
     
-    private DogBuild(String name, int age, int sex, int height, int width) {
-	this.name = name;
-	this.age = age;
-	this.sex = sex;
-	this.height = height;
-	this.width = width;
+    private Dog(Builder builder) {
+	this.name = builder.name;
+	this.age = builder.age;
+	this.sex = builder.sex;
+	this.height = builder.height;
+	this.width = builder.width;
+	//在对象域中进行参数校验，在builder域校验，到对象域参数可能发生变化。
+	//校验代码
     }
-    
-    public static class Builder {
+    /**
+     * 静态内部类，这样可以不用依赖外部类实例化
+     * */
+    public static class Builder implements IBuilder<Dog> {
 
 	private String name;
 
@@ -50,11 +59,7 @@ public class DogBuild {
 
 	private int width;
 	
-	public Builder() {
-	    
-	}
-	
-	public Builder(String name) {
+	public Builder(String name) {//name为必选参数，其他的都是可选参数，可以设置一个默认的值。
 	    this.name = name;
 	}
 	
@@ -82,11 +87,39 @@ public class DogBuild {
 	    this.width = width;
 	    return this;
 	}
-	
-	public DogBuild build() {
-	    return new DogBuild(name, age, sex, height, width);
+
+	/**
+	 * 创建对象
+	 * */
+	@Override
+	public Dog build() {
+	    return new Dog(this);
 	}
     }
+    
+    //------------只有get方法----------------
+    public String getName() {
+        return name;
+    }
+    
+    public int getAge() {
+        return age;
+    }
+    
+    public int getSex() {
+        return sex;
+    }
+    
+    public int getHeight() {
+        return height;
+    }
+    
+    public int getWidth() {
+        return width;
+    }
+    
+    
+    
 
 }
  

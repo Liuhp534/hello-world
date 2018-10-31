@@ -7,7 +7,7 @@
  * you entered into with Huize,http://www.huize.com.
  *  
  */   
-package cn.liu.hui.peng.newobj; 
+package cn.liu.hui.peng.effective; 
 
 import java.util.Calendar;
 import java.util.Date;
