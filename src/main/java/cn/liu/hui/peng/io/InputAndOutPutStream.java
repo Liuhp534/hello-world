@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2006-2016 Huize Ltd. All Rights Reserved. 
- *  
- * This code is the confidential and proprietary information of   
- * Hzins. You shall not disclose such Confidential Information   
- * and shall use it only in accordance with the terms of the agreements   
- * you entered into with Huize,http://www.huize.com.
- *  
- */   
 package cn.liu.hui.peng.io; 
 
 import java.io.FileInputStream;
@@ -38,10 +29,10 @@ public class InputAndOutPutStream {
 	//outSome();
 	//outputWriterSome();
 	//inputReaderSome();
-	//outputWriterSome2();
+	outputWriterSome2();
 	/*PrintWriter print = new PrintWriter(System.out);
 	print.println("aaa你好");*/
-	testObjectOutputStream();
+	//testObjectOutputStream();
     }
     
     /**输出对象，需要加入序列化*/
@@ -154,8 +145,8 @@ public class InputAndOutPutStream {
     /**书写器，字符，采用unicode编码*/
     public static void outputWriterSome2() {
 	try (Writer writer = new OutputStreamWriter(new FileOutputStream("E:/201807_work/test.txt"))) {
-	    String test = "你好啊world";
-	    writer.write(test, 0, 6);
+	    String test = "你好啊world\n";
+	    writer.write(test, 0, test.length());
 	} catch (IOException e) {
 	    e.printStackTrace();
         }

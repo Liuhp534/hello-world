@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2006-2015 Hzins Ltd. All Rights Reserved. 
- *  
- * This code is the confidential and proprietary information of   
- * Hzins. You shall not disclose such Confidential Information   
- * and shall use it only in accordance with the terms of the agreements   
- * you entered into with Hzins,http://www.hzins.com.
- *  
- */   
 package cn.liu.hui.peng.wheel; 
 
 
@@ -24,84 +15,87 @@ public class Response<T> {
 
     private T result;
 
-    private String msg;
+    private String errorMsg;
 
     private String status = "00000";
     
     private boolean success = Boolean.TRUE;
     
-    private int totalRows;
-    
-    
+    /**
+     * 构建器
+     * */
     public static class ResponseBuilder<T> {
 
 	private T result;
 
-	private String msg;
+	private String errorMsg;
 
 	private String status = "00000";
 
 	private boolean success = Boolean.TRUE;
 	
-	public ResponseBuilder<T> fail() {
-	    this.msg = "";
-	    this.status = "-1";
-	    this.success = Boolean.FALSE;
+	public ResponseBuilder<T> setResult(T result) {
+	    this.result = result;
 	    return this;
 	}
+	
+	public ResponseBuilder<T> setErrorMsg(String errorMsg) {
+	    this.errorMsg = errorMsg;
+	    return this;
+	}
+	
+	public ResponseBuilder<T> setStatus(String status) {
+	    this.status = status;
+	    return this;
+	}
+	
+	public ResponseBuilder<T> setSuccess(boolean success) {
+	    this.success = success;
+	    return this;
+	}
+
+	public Response<T> build() {
+	    return new Response<T>(result, errorMsg, status, success);
+	}
+    }
+    
+    private Response () {
+	
     }
 
-    public Response() {
+    private Response (T result, String errorMsg, String status, boolean success) {
+	this.result = result;
+	this.errorMsg = errorMsg;
+	this.status = status;
+	this.success = success;
     }
-
-    public Response(T result) {
-        this.result = result;
-    }
-
 
     public T getResult() {
         return result;
     }
-
-    public void setResult(T result) {
-        if (result != null) {
-            this.result = result;
-        }
-    }
-
     
-    public String getMsg() {
-        return msg;
-    }
-
-    
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public String getErrorMsg() {
+        return errorMsg;
     }
 
     public String getStatus() {
         return status;
     }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-    
     
     public boolean isSuccess() {
         return success;
     }
 
-    
-    public void setSuccess(boolean success) {
-        this.success = success;
+    public static <T> Response<T> success() {
+        return new Response<T>();
     }
-
-    public static <T> Response<T> of(String msg, String status) {
-        Response<T> response = new Response<T>();
-        response.setMsg(msg);
-        response.setStatus(status);
-        return response;
+    
+    public static <T> Response<T> fail(String status, String errorMsg) {
+	Response<T> fail = new Response<T>();
+	fail.errorMsg = errorMsg;
+	fail.status = status;
+	fail.success = Boolean.FALSE;
+        return fail;
     }
 }
  

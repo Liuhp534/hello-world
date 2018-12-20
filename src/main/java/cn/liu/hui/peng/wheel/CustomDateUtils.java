@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2006-2016 Huize Ltd. All Rights Reserved. 
- *  
- * This code is the confidential and proprietary information of   
- * Hzins. You shall not disclose such Confidential Information   
- * and shall use it only in accordance with the terms of the agreements   
- * you entered into with Huize,http://www.huize.com.
- *  
- */   
 package cn.liu.hui.peng.wheel; 
 
 import java.text.ParseException;
@@ -201,6 +192,30 @@ public class CustomDateUtils {
 	Date result = calendar.getTime();
 	return result;
     }
+    
+    /**
+     * <p> 传入参数为字符串类型 <br> 2018-11-02 --> 2018-11-02 00:00:00 </p>
+     *
+     */
+    public static String toDayStart(String dateStr) {
+        if (CustomStringUtils.isEmpty(dateStr)) {
+            return dateStr;
+        }
+        return dateStr + time_zero;
+    }
+    
+    /**
+     * <p> 传入参数为字符串类型 <br> 2018-11-02 --> 2018-11-02 23:59:59 </p>
+     *
+     */
+    public static String toDayEnd(String dateStr) {
+        if (CustomStringUtils.isEmpty(dateStr)) {
+            return dateStr;
+        }
+        return dateStr + time_max;
+    }
+    
+    
     
     public static boolean isDateStr(String dateStr) {
 	// 使用正则表达式 测试 字符 符合 dddd-dd-dd 的格式(d表示数字)

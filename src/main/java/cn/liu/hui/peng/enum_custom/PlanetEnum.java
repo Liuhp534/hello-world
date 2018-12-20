@@ -1,12 +1,3 @@
-/**
- * Copyright (c) 2006-2015 Hzins Ltd. All Rights Reserved. 
- *  
- * This code is the confidential and proprietary information of   
- * Hzins. You shall not disclose such Confidential Information   
- * and shall use it only in accordance with the terms of the agreements   
- * you entered into with Hzins,http://www.hzins.com.
- *  
- */   
 package cn.liu.hui.peng.enum_custom; 
 
 
@@ -53,7 +44,7 @@ public enum PlanetEnum {
     /**
      * 根据value获取对应的枚举
      * */
-    public PlanetEnum getByValue(byte value) {
+    public static PlanetEnum getByValue(byte value) {
 	PlanetEnum result = null;
 	if (value <= 0) {
 	    return result;
@@ -61,6 +52,23 @@ public enum PlanetEnum {
 	for (PlanetEnum planetEnum : PlanetEnum.values()) {
 	    if (value == planetEnum.value) {
 		result = planetEnum;
+		break;
+	    }
+	}
+	return result;
+    }
+    
+    /**
+     * 根据value获取对应的枚举描述
+     * */
+    public static String getDescByValue(byte value) {
+	String result = null;
+	if (value <= 0) {
+	    return result;
+	}
+	for (PlanetEnum planetEnum : PlanetEnum.values()) {
+	    if (value == planetEnum.value) {
+		result = planetEnum.getDesc();
 		break;
 	    }
 	}
