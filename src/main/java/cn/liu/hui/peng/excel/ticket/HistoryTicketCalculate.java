@@ -31,6 +31,8 @@ public class HistoryTicketCalculate {
     /*动态的历史数据，预测的时候才能够确定*/
     static List<TicketData> historyTicketDatas;
 
+    private static boolean createExcelFlag = Boolean.FALSE;
+
     /*初始化数据*/
     static {
         MathStack.createHT(false);//初始化组合数据
@@ -60,8 +62,9 @@ public class HistoryTicketCalculate {
     public static void main(String[] args) throws Exception {
         //预测开始期数2019059，预测期数2（没有那么多预测时退出）,预测深度就连续出现的阈值6
         long start = System.currentTimeMillis();
-
-        multiple(2019059, 2, 6);
+        JdbcUtils.repeatAllData();//先修复所有数据正常态
+        createExcelFlag = Boolean.TRUE;
+        multiple(2019001, 61, 5);
         System.out.println("耗时=" + (System.currentTimeMillis() - start));
     }
 
@@ -90,7 +93,7 @@ public class HistoryTicketCalculate {
             //获取下一个预测
             futureTicketData = JdbcUtils.getDeletedForCalculate();
             if (null == futureTicketData) {//如果不存在下期，那么预测结束
-                System.out.println("预测完成，预测次数=" + (i + 1));
+                System.out.println("没有更多了，程序结束，预测完成，预测次数=" + (i + 1));
                 break;
             }
             startPeriodNum = futureTicketData.getPeriodNum();
@@ -165,7 +168,7 @@ public class HistoryTicketCalculate {
             ticketIdStr = entry.getKey().split("_")[0];
             ticketCount = Integer.valueOf(entry.getKey().split("_")[1]);
             if (ticketCount >= calculateDepth) {
-                choiceSet = entry.getValue().indexOf("反") != -1 ? MathStack.hMap.get(ticketIdStr) : MathStack.tMap.get(ticketIdStr);
+                choiceSet = entry.getValue().indexOf("反") != -1 ? MathStack.hMap.get(ticketIdStr) : MathStack.tMap.get(ticketIdStr);//当连续出现在反时，需要选择正向
                 if ((maxCount == 0) || (maxCount > 0 && maxCount < ticketCount)) {//一般只打印序次数最大的那个，最先出现的
                     maxCount = ticketCount;
                     maxCountContent = entry.getValue();
@@ -173,23 +176,29 @@ public class HistoryTicketCalculate {
                     maxTicketIdStr = ticketIdStr;
                 }
                 allSet.addAll(choiceSet);
-                createExcel(startPeriodNum+"", ticketCount + "_" + ticketIdStr + "预测" + startPeriodNum + "期通过序号_" + entry.getKey(), MathStack.hMap.get(ticketIdStr));
+                if (createExcelFlag) {
+                    createExcel(startPeriodNum+"", ticketCount + "_" + ticketIdStr + "预测" + startPeriodNum + "期通过序号_" + entry.getKey(),
+                            MathStack.hMap.get(ticketIdStr));
+                }
+
             }
         }
         resultMap.clear();//将这一次的统计情况清除
         if (!StringUtils.isEmpty(maxTicketIdStr)) {
             //清除综合选择中的基本选择
+            Set<String> otherChoice = new LinkedHashSet<>();//其他选择
             Iterator<String> allIt = allSet.iterator();
             while (allIt.hasNext()) {
-                if (maxSet.contains(allIt.next())) {
-                    allIt.remove();
+                String temp = allIt.next();
+                if (!maxSet.contains(temp)) {
+                    otherChoice.add(temp);
                 }
             }
             //拼接预测文案
-            String choiceContent = String.format("组合序号为=%s，出现次数为=%s，对应的组合详情为=正%s 反%s，选择=%s, 综合选择=%s",
+            String choiceContent = String.format("组合序号为=%s，出现次数为=%s，对应的组合详情为=正%s 反%s，选择=%s, 综合选择=%s, 范围选择=%s",
                     maxTicketIdStr, maxCountContent, MathStack.hMap.get(maxTicketIdStr), MathStack.tMap.get(maxTicketIdStr),
                     maxCountContent.indexOf("反") != -1 ? "正" + MathStack.hMap.get(ticketIdStr) : "反" + MathStack.tMap.get(ticketIdStr),
-                    allSet);
+                    allSet, otherChoice);
             System.out.println(choiceContent);
         } else {
             System.out.println("无预测的内容");
@@ -222,7 +231,7 @@ public class HistoryTicketCalculate {
         }
         int row = 1;
         String lxtemp = "";
-        int lxcount = 0;
+        int lxcount = 1;
         String resulttemp = "";
         int resultcount = 1;
        for (int i = 0; i < historyTicketDatas.size(); i ++) {
@@ -287,11 +296,18 @@ public class HistoryTicketCalculate {
            }
            if (lxtemp.equals(historyTicketDatas.get(i).getSpecial())) {
                lxcount ++;
+               if (lxcount >= 2) {
+                   for (int j = 2; j <= lxcount; j ++) {
+                       sheet.getRow(row - j).getCell(5).setCellValue("连续" + historyTicketDatas.get(i).getSpecial() + lxcount);
+                   }
+               }
                cell = excelRow.createCell(5);
                cell.setCellValue("连续" + historyTicketDatas.get(i).getSpecial() + lxcount);
            } else {
                lxtemp = historyTicketDatas.get(i).getSpecial();
-               lxcount = 0;
+               lxcount = 1;
+               cell = excelRow.createCell(5);
+               cell.setCellValue("");
            }
        }
         File file = new File("C:\\Users\\liuhp\\Desktop\\ticket\\calculate\\" +num );

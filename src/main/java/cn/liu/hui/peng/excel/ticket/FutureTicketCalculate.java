@@ -74,6 +74,10 @@ public class FutureTicketCalculate {
             ticketCount = Integer.valueOf(entry.getKey().split("_")[1]);
             if (ticketCount >= calculateDepth) {
                 choiceSet = entry.getValue().indexOf("反") != -1 ? MathStack.hMap.get(ticketIdStr) : MathStack.tMap.get(ticketIdStr);
+                if (maxCount == 0) {
+                    maxSet = choiceSet;
+                    maxCount = ticketCount;
+                }
                 System.out.println(String.format("组合序号为=%s，出现次数为=%s，对应的组合详情为=正%s 反%s，选择=%s",
                         ticketIdStr, entry.getValue(), MathStack.hMap.get(ticketIdStr), MathStack.tMap.get(ticketIdStr),
                         entry.getValue().indexOf("反") != -1 ? "正" + MathStack.hMap.get(ticketIdStr) : "反" + MathStack.tMap.get(ticketIdStr)));
@@ -82,7 +86,15 @@ public class FutureTicketCalculate {
             }
         }
         //清除综合选择中的基本选择
-        System.out.println("综合选择=" + allSet);
+        Set<String> otherChoice = new LinkedHashSet<>();//其他选择
+        Iterator<String> allIt = allSet.iterator();
+        while (allIt.hasNext()) {
+            String temp = allIt.next();
+            if (!maxSet.contains(temp)) {
+                otherChoice.add(temp);
+            }
+        }
+        System.out.println("综合选择=" + allSet + "，其他选择=" + otherChoice);
     }
 
     /*计算每种组合的开始最大出现数*/

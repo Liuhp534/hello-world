@@ -29,9 +29,11 @@ public class RecordHistorySeries {
 
     private static boolean createExcelFlag = Boolean.FALSE;//默认不打印excel
 
+    static String dataYearStart = "2018-01-01";
     /*初始化数据*/
     static {
-        String sql = "select * from ticket_data  order by period_num desc ";
+        String sql = "select * from ticket_data where create_time >= '" + dataYearStart + "'  order by period_num desc ";
+        System.out.println(sql);
         ticketDatas = JdbcUtils.getAllBySql(sql);
         MathStack.createHT(Boolean.FALSE);
         //key=期数+连续数+组合序号+序列号 value=组合序号+连续数
@@ -69,9 +71,10 @@ public class RecordHistorySeries {
         });
     }
 
+    static int maxThreshold = 22;//最大能打印excel的连续出现期数的最大值
     public static void main(String[] args) throws Exception {
         //createExcelFlag = Boolean.TRUE;//这个可以生产excel
-        int threshold = 10;
+        int threshold = 1;
         createAllRepeatResult(threshold);
     }
 
@@ -80,9 +83,9 @@ public class RecordHistorySeries {
     * 还需要打印开始哪期的
     * */
     private static void createAllRepeatResult(int threshold) throws Exception {
-        if (threshold <= 6) {
+        /*if (threshold <= 6) {
             return;
-        }
+        }*/
         Map<String, Set<String>> hMap = MathStack.hMap;
         Map<String, Set<String>> tMap = MathStack.tMap;
 
@@ -101,7 +104,7 @@ public class RecordHistorySeries {
             peroidNumStr = entry.getKey().split("_")[0];//期数
             ticketIdStr = entry.getKey().split("_")[2];//组合数
             ticketCount = Integer.valueOf(entry.getKey().split("_")[1]);//连续数
-            if (ticketCount >= threshold) {
+            if (ticketCount >= threshold && ticketCount < maxThreshold) {
                 //获取同一个组合，同样数量的情况
                 if (null != commonMap.get(entry.getValue())) {
                     Integer i1 = commonMap.get(entry.getValue());
@@ -117,9 +120,9 @@ public class RecordHistorySeries {
                     yearMap.put(peroidNumStr.substring(0, 4) + "|" + ticketCount, 1);
                 }
                 //System.out.println(entry.getKey());
-                if (createExcelFlag) {
+                if (createExcelFlag && threshold > 8) {
                     excelName = ticketCount + "_" + ticketIdStr + "预测2018数据统计连续最大值大于8期通过序号" + peroidNumStr + "_" + entry.getKey().split("_")[3];
-                    createExcel("数据统计连续最大值大于" + threshold, excelName, MathStack.hMap.get(ticketIdStr));
+                    createExcel(dataYearStart + "数据统计连续最大值大于" + threshold, excelName, MathStack.hMap.get(ticketIdStr));
                 }
             }
         }
@@ -129,13 +132,35 @@ public class RecordHistorySeries {
             }
         }
         int temp = 0;//验证是否数据量匹配上了
+        Map<String, Integer> yearTotalMap = new HashMap<>();
         for (Map.Entry<String, Integer> entry : yearMap.entrySet()) {
             temp += entry.getValue();
-            System.out.println(entry.getKey() + "_" + entry.getValue());
+            if (null != yearTotalMap.get(entry.getKey().split("\\|")[0])) {
+                yearTotalMap.put(entry.getKey().split("\\|")[0],
+                        yearTotalMap.get(entry.getKey().split("\\|")[0]) + entry.getValue());
+            } else {
+                yearTotalMap.put(entry.getKey().split("\\|")[0], entry.getValue());
+            }
+        }
+        for (Map.Entry<String, Integer> entry : yearMap.entrySet()) {
+            System.out.println(entry.getKey() + "，次数=" + entry.getValue() + "，概率=" + mathProportion(entry.getValue(),
+                    yearTotalMap.get(entry.getKey().split("\\|")[0])));
         }
         /*System.out.println(printTreeMap.size());
         System.out.println(allTreeMapCount);
         System.out.println(temp);*/
+        System.out.println(temp);
+    }
+
+    /*计算比例*/
+    private static Double mathProportion(int basicCount, int totalCount) {
+        BigDecimal basicDecimal = new BigDecimal(basicCount);
+        BigDecimal allDecimal = new BigDecimal(totalCount);
+        // 使用四舍五入模式，保留两位小数，注意模式HALF_UP
+        MathContext mc = new MathContext(20, RoundingMode.HALF_UP);
+        Double basicChance = basicDecimal.divide(allDecimal, mc).doubleValue();
+        //System.out.println(basicCount + "_" + totalCount + "_" + basicChance);
+        return basicChance;
     }
 
     /*计算每种组合出现连续中的次数，当达到threshold阈值的时候print*/
