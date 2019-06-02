@@ -25,11 +25,38 @@ public class JdbcUtils {
     }
 
 
+    /*获取所有的数据无视删除状态，更具期数排序，降序*/
     public static List<TicketData> getAll() {
         List<TicketData> ticketDatas = new ArrayList<>();
         TicketData ticketData = null;
         Connection conn = getConn();
-        String sql = "select * from ticket_data where create_time >= '2018-01-01'  order by period_num desc ";
+        String sql = "select * from ticket_data  order by period_num desc ";
+        PreparedStatement pstmt;
+        try {
+            pstmt = (PreparedStatement)conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery();
+            int col = rs.getMetaData().getColumnCount();
+            System.out.println("=============获取数据开始===============");
+            while (rs.next()) {
+                ticketData = new TicketData();
+                ticketData.setId(rs.getInt(1));
+                ticketData.setPeriodNum(rs.getInt(2));
+                ticketData.setSpecial(rs.getString(10));
+                ticketDatas.add(ticketData);
+            }
+            System.out.println("=============获取数据总量=" +  ticketDatas.size()+ "===============");
+            System.out.println("=============获取数据结束===============");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ticketDatas;
+    }
+
+    /*获取所有的数据无视删除状态，更具期数排序，降序*/
+    public static List<TicketData> getAllBySql(String sql) {
+        List<TicketData> ticketDatas = new ArrayList<>();
+        TicketData ticketData = null;
+        Connection conn = getConn();
         PreparedStatement pstmt;
         try {
             pstmt = (PreparedStatement)conn.prepareStatement(sql);
@@ -165,6 +192,23 @@ public class JdbcUtils {
             e.printStackTrace();
         }
         return i;
+    }
+
+    /*修复所有数据为正常状态*/
+    public static void repeatAllData() {
+        Connection conn = getConn();
+        int i = 0;
+        String sql = "update ticket_data set deleted = 0";
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = (PreparedStatement) conn.prepareStatement(sql);
+            i = pstmt.executeUpdate();
+            pstmt.close();
+            conn.close();
+            System.out.println("==========修复所有数据为正常状态==========");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private static Connection getConn() {
