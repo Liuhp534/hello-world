@@ -27,6 +27,10 @@ public class RecordHistorySeries {
 
     static int allTreeMapCount = 0;//为了防止重叠的
 
+    static Comparator<String> keyComparator;
+
+    static Comparator<String> ignoreCountkeyComparator;
+
     private static boolean createExcelFlag = Boolean.FALSE;//默认不打印excel
 
     static String dataYearStart = "2018-01-01";
@@ -37,7 +41,7 @@ public class RecordHistorySeries {
         ticketDatas = JdbcUtils.getAllBySql(sql);
         MathStack.createHT(Boolean.FALSE);
         //key=期数+连续数+组合序号+序列号 value=组合序号+连续数
-        printTreeMap = new TreeMap<>(new Comparator<String>() {
+        keyComparator = new Comparator<String>() {
             @Override
             public int compare(String s1, String s2) {
                 String[] ss1 = s1.split("_");
@@ -74,7 +78,40 @@ public class RecordHistorySeries {
                     }
                 }
             }
-        });
+        };
+        ignoreCountkeyComparator = new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                String[] ss1 = s1.split("_");
+                String[] ss2 = s2.split("_");
+                if (Integer.valueOf(ss1[0].substring(0, 4)).intValue() > Integer.valueOf(ss2[0].substring(0, 4)).intValue()) {//比较年份
+                    return -1;
+                } else if (Integer.valueOf(ss1[0].substring(0, 4)).intValue() < Integer.valueOf(ss2[0].substring(0, 4)).intValue()) {
+                    return 1;
+                } else {
+                    if (Integer.valueOf(ss1[0]).intValue() > Integer.valueOf(ss2[0]).intValue()) {//起始位置，比较
+                        return -1;
+                    } else if (Integer.valueOf(ss1[0]).intValue() < Integer.valueOf(ss2[0]).intValue()) {
+                        return 1;
+                    } else {
+                        if (Integer.valueOf(ss1[2]).intValue() > Integer.valueOf(ss2[2]).intValue()) {//比较组合序号
+                            return -1;
+                        } else if (Integer.valueOf(ss1[2]).intValue() < Integer.valueOf(ss2[2]).intValue()) {
+                            return 1;
+                        } else {
+                            if (Integer.valueOf(ss1[3]).intValue() > Integer.valueOf(ss2[3]).intValue()) {//比较序列号
+                                return -1;
+                            } else if (Integer.valueOf(ss1[3]).intValue() < Integer.valueOf(ss2[3]).intValue()) {
+                                return 1;
+                            } else {
+                                return 0;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        printTreeMap = new TreeMap<>(keyComparator);
     }
 
     static int maxThreshold = 22;//最大能打印excel的连续出现期数的最大值
