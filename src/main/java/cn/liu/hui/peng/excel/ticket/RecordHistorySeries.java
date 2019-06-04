@@ -46,23 +46,29 @@ public class RecordHistorySeries {
                     return -1;
                 } else if (Integer.valueOf(ss1[0].substring(0, 4)).intValue() < Integer.valueOf(ss2[0].substring(0, 4)).intValue()) {
                     return 1;
-                } else {//如果相等，则比较前面那个数据，比较数量
-                    if (Integer.valueOf(ss1[1]).intValue() > Integer.valueOf(ss2[1]).intValue()) {
+                } else {
+                    if (Integer.valueOf(ss1[1]).intValue() > Integer.valueOf(ss2[1]).intValue()) {//如果相等，则比较前面那个数据，比较数量
                         return -1;
                     } else if (Integer.valueOf(ss1[1]).intValue() < Integer.valueOf(ss2[1]).intValue()) {
                         return 1;
-                    } else {//相等的话就表示同一个数据，并且会更新数据，这里很重要啊
-                        if (Integer.valueOf(ss1[2]).intValue() > Integer.valueOf(ss2[2]).intValue()) {
+                    } else {
+                        if (Integer.valueOf(ss1[0]).intValue() > Integer.valueOf(ss2[0]).intValue()) {//起始位置，比较
                             return -1;
-                        } else if (Integer.valueOf(ss1[2]).intValue() < Integer.valueOf(ss2[2]).intValue()) {
+                        } else if (Integer.valueOf(ss1[0]).intValue() < Integer.valueOf(ss2[0]).intValue()) {
                             return 1;
                         } else {
-                            if (Integer.valueOf(ss1[3]).intValue() > Integer.valueOf(ss2[3]).intValue()) {
+                            if (Integer.valueOf(ss1[2]).intValue() > Integer.valueOf(ss2[2]).intValue()) {//比较组合序号
                                 return -1;
-                            } else if (Integer.valueOf(ss1[3]).intValue() < Integer.valueOf(ss2[3]).intValue()) {
+                            } else if (Integer.valueOf(ss1[2]).intValue() < Integer.valueOf(ss2[2]).intValue()) {
                                 return 1;
                             } else {
-                                return 0;
+                                if (Integer.valueOf(ss1[3]).intValue() > Integer.valueOf(ss2[3]).intValue()) {//比较序列号
+                                    return -1;
+                                } else if (Integer.valueOf(ss1[3]).intValue() < Integer.valueOf(ss2[3]).intValue()) {
+                                    return 1;
+                                } else {
+                                    return 0;
+                                }
                             }
                         }
                     }
