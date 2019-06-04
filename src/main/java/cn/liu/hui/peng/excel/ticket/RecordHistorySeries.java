@@ -111,13 +111,13 @@ public class RecordHistorySeries {
                 }
             }
         };
-        printTreeMap = new TreeMap<>(keyComparator);
+        printTreeMap = new TreeMap<>(ignoreCountkeyComparator);
     }
 
     static int maxThreshold = 22;//最大能打印excel的连续出现期数的最大值
     public static void main(String[] args) throws Exception {
         //createExcelFlag = Boolean.TRUE;//这个可以生产excel
-        int threshold = 1;
+        int threshold = 8;
         createAllRepeatResult(threshold);
     }
 
@@ -163,6 +163,9 @@ public class RecordHistorySeries {
                     yearMap.put(peroidNumStr.substring(0, 4) + "|" + ticketCount, 1);
                 }
                 //System.out.println(entry.getKey());
+                String startPeriod = entry.getKey().split("_")[0];
+                String entPeriod = Integer.valueOf(startPeriod) + Integer.valueOf(entry.getKey().split("_")[1]) - 1 + "";
+                System.out.println(entry.getKey() + "=" + entry.getValue() + "=" + startPeriod + "-" + entPeriod);
                 if (createExcelFlag && threshold > 8) {
                     excelName = ticketCount + "_" + ticketIdStr + "预测2018数据统计连续最大值大于8期通过序号" + peroidNumStr + "_" + entry.getKey().split("_")[3];
                     createExcel(dataYearStart + "数据统计连续最大值大于" + threshold, excelName, MathStack.hMap.get(ticketIdStr));
@@ -223,7 +226,7 @@ public class RecordHistorySeries {
                         //System.out.println(ticketDatas.get(i).getPeriodNum() + "-" + hentry.getKey()+"_"+resultcount);
                         allTreeMapCount ++;
                         printTreeMap.put(ticketDatas.get(i-1).getPeriodNum() + "_" + resultcount +"_"+hentry.getKey() + "_" + allTreeMapCount,
-                                resultcount +"_"+ hentry.getKey());
+                                "反" + resultcount +"_"+ hentry.getKey());
                     }
                     resultcount = 1;
                     resulttemp = "正";
@@ -239,7 +242,7 @@ public class RecordHistorySeries {
                         //System.out.println(ticketDatas.get(i).getPeriodNum() + "-" + hentry.getKey()+"_"+resultcount);
                         allTreeMapCount ++;
                         printTreeMap.put(ticketDatas.get(i-1).getPeriodNum()   + "_" + resultcount +"_"+hentry.getKey() + "_" + allTreeMapCount,
-                                resultcount +"_"+ hentry.getKey());
+                                "正" + resultcount +"_"+ hentry.getKey());
                     }
                     resultcount = 1;
                     resulttemp = "反";

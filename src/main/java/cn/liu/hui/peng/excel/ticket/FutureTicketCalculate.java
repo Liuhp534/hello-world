@@ -54,12 +54,13 @@ public class FutureTicketCalculate {
     }
 
     public static void main(String[] args) throws Exception {
-        calculate(6);
+        calculate(5);
     }
 
 
     /*计算下次出的数据*/
     private static void calculate(int calculateDepth) throws Exception {
+        JdbcUtils.repeatAllData();//先修复所有数据正常态
         int startPeriodNum = ticketDatas.get(0).getPeriodNum() + 1;//获取最后一期，加上1，如果扩年需要特殊处理
         System.out.println("预测期数=" + startPeriodNum);
         String ticketIdStr = "";

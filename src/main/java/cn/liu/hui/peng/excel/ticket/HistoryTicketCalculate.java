@@ -63,8 +63,8 @@ public class HistoryTicketCalculate {
         //预测开始期数2019059，预测期数2（没有那么多预测时退出）,预测深度就连续出现的阈值6
         long start = System.currentTimeMillis();
         JdbcUtils.repeatAllData();//先修复所有数据正常态
-        createExcelFlag = Boolean.TRUE;
-        multiple(2019001, 61, 5);
+        //createExcelFlag = Boolean.TRUE;
+        multiple(2019001, Integer.MAX_VALUE, 6);
         JdbcUtils.repeatAllData();//先修复所有数据正常态
         System.out.println("耗时=" + (System.currentTimeMillis() - start));
     }
@@ -198,7 +198,7 @@ public class HistoryTicketCalculate {
             //拼接预测文案
             String choiceContent = String.format("组合序号为=%s，出现次数为=%s，对应的组合详情为=正%s 反%s，选择=%s, 综合选择=%s, 范围选择=%s",
                     maxTicketIdStr, maxCountContent, MathStack.hMap.get(maxTicketIdStr), MathStack.tMap.get(maxTicketIdStr),
-                    maxCountContent.indexOf("反") != -1 ? "正" + MathStack.hMap.get(ticketIdStr) : "反" + MathStack.tMap.get(ticketIdStr),
+                    maxCountContent.indexOf("反") != -1 ? "正" + MathStack.hMap.get(maxTicketIdStr) : "反" + MathStack.tMap.get(maxTicketIdStr),
                     allSet, otherChoice);
             System.out.println(choiceContent);
         } else {
