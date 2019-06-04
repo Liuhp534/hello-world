@@ -65,6 +65,7 @@ public class HistoryTicketCalculate {
         JdbcUtils.repeatAllData();//先修复所有数据正常态
         createExcelFlag = Boolean.TRUE;
         multiple(2019001, 61, 5);
+        JdbcUtils.repeatAllData();//先修复所有数据正常态
         System.out.println("耗时=" + (System.currentTimeMillis() - start));
     }
 
