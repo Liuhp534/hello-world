@@ -26,9 +26,10 @@ public class FutureTicketCalculate {
     /*历史数据*/
     static List<TicketData> ticketDatas = null;
 
+    static int shiftCount = 5;
     /*初始化数据*/
     static {
-        MathStack.createHT(false);//初始化组合数据
+        MathStack.createHT(false, shiftCount);//初始化组合数据
         Comparator<String> negativeComparator = new Comparator<String>() {
             @Override
             public int compare(String s1, String s2) {//s1 > s2 返回1是升序，s1 > s2 返回-1是降序
@@ -54,7 +55,7 @@ public class FutureTicketCalculate {
     }
 
     public static void main(String[] args) throws Exception {
-        calculate(5);
+        calculate(6 + shiftCount);
     }
 
 

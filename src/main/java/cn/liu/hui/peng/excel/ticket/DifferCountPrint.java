@@ -46,8 +46,16 @@ public class DifferCountPrint {
 
     public static void main(String[] args) {
         JdbcUtils.repeatAllData();//先修复所有数据正常态
+
+        JdbcUtils.repeatAllData();//先修复所有数据正常态
+    }
+
+
+
+    /*某种特定组合的连续情况，这种就不靠谱，靠历史的结果反推*/
+    private static void calculateDifferCount() {
         TicketData futureTicketData = null;
-        int startPeriodNum = 2018001;
+        int startPeriodNum = 2019001;
         int calculateCount = 153;
         String ticketIdStr = "309";
         for (int i = 0; i < calculateCount; i ++) {
@@ -79,7 +87,6 @@ public class DifferCountPrint {
             }
             startPeriodNum = futureTicketData.getPeriodNum();
         }
-        JdbcUtils.repeatAllData();//先修复所有数据正常态
     }
 
 

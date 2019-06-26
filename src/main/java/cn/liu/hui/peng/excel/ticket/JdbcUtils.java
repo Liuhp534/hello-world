@@ -142,6 +142,12 @@ public class JdbcUtils {
                 ticketData = new TicketData();
                 ticketData.setId(rs.getInt(1));
                 ticketData.setPeriodNum(rs.getInt(2));
+                ticketData.setPosition1(rs.getString(4));
+                ticketData.setPosition2(rs.getString(5));
+                ticketData.setPosition3(rs.getString(6));
+                ticketData.setPosition4(rs.getString(7));
+                ticketData.setPosition5(rs.getString(8));
+                ticketData.setPosition6(rs.getString(9));
                 ticketData.setSpecial(rs.getString(10));
                 ticketDatas.add(ticketData);
             }
@@ -167,6 +173,12 @@ public class JdbcUtils {
                 ticketData = new TicketData();
                 ticketData.setId(rs.getInt(1));
                 ticketData.setPeriodNum(rs.getInt(2));
+                ticketData.setPosition1(rs.getString(4));
+                ticketData.setPosition2(rs.getString(5));
+                ticketData.setPosition3(rs.getString(6));
+                ticketData.setPosition4(rs.getString(7));
+                ticketData.setPosition5(rs.getString(8));
+                ticketData.setPosition6(rs.getString(9));
                 ticketData.setSpecial(rs.getString(10));
             }
             //System.out.println("=============获取被预测的数据=" +  (ticketData == null ? "无更多了" : ticketData.getPeriodNum()) + "===============");

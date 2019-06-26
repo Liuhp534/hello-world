@@ -33,9 +33,10 @@ public class HistoryTicketCalculate {
 
     private static boolean createExcelFlag = Boolean.FALSE;
 
+    static int shiftCount = 1;
     /*初始化数据*/
     static {
-        MathStack.createHT(false);//初始化组合数据
+        MathStack.createHT(false, shiftCount);//初始化组合数据
         Comparator<String> negativeComparator = new Comparator<String>() {
             @Override
             public int compare(String s1, String s2) {//s1 > s2 返回1是升序，s1 > s2 返回-1是降序
@@ -64,7 +65,7 @@ public class HistoryTicketCalculate {
         long start = System.currentTimeMillis();
         JdbcUtils.repeatAllData();//先修复所有数据正常态
         //createExcelFlag = Boolean.TRUE;
-        multiple(2019001, Integer.MAX_VALUE, 6);
+        multiple(2018001, Integer.MAX_VALUE, 6 + shiftCount);
         JdbcUtils.repeatAllData();//先修复所有数据正常态
         System.out.println("耗时=" + (System.currentTimeMillis() - start));
     }
@@ -176,6 +177,10 @@ public class HistoryTicketCalculate {
                     maxSet = choiceSet;
                     maxTicketIdStr = ticketIdStr;
                 }
+                //打印其他连续次数的信息，主要想看看是否偏态和稳定
+                /*System.out.println(String.format("组合序号为=%s，出现次数为=%s，对应的组合详情为=正%s 反%s，选择=%s",
+                        ticketIdStr, entry.getValue(), MathStack.hMap.get(ticketIdStr), MathStack.tMap.get(ticketIdStr),
+                        entry.getValue().indexOf("反") != -1 ? "正" + MathStack.hMap.get(ticketIdStr) : "反" + MathStack.tMap.get(ticketIdStr)));*/
                 allSet.addAll(choiceSet);
                 if (createExcelFlag) {
                     createExcel(startPeriodNum+"", ticketCount + "_" + ticketIdStr + "预测" + startPeriodNum + "期通过序号_" + entry.getKey(),
@@ -185,7 +190,9 @@ public class HistoryTicketCalculate {
             }
         }
         resultMap.clear();//将这一次的统计情况清除
+        boolean hort = false;//单双情况，true=双
         if (!StringUtils.isEmpty(maxTicketIdStr)) {
+            hort = Integer.valueOf(maxTicketIdStr) % 2 == 0 ? true : false;
             //清除综合选择中的基本选择
             Set<String> otherChoice = new LinkedHashSet<>();//其他选择
             Iterator<String> allIt = allSet.iterator();
@@ -196,16 +203,31 @@ public class HistoryTicketCalculate {
                 }
             }
             //拼接预测文案
-            String choiceContent = String.format("组合序号为=%s，出现次数为=%s，对应的组合详情为=正%s 反%s，选择=%s, 综合选择=%s, 范围选择=%s",
-                    maxTicketIdStr, maxCountContent, MathStack.hMap.get(maxTicketIdStr), MathStack.tMap.get(maxTicketIdStr),
+            String choiceContent = String.format("组合序号为=%s, 单双=%s，出现次数为=%s，对应的组合详情为=正%s 反%s，选择=%s, 综合选择=%s, 范围选择=%s",
+                    maxTicketIdStr, hort ? "双" : "单", maxCountContent, MathStack.hMap.get(maxTicketIdStr), MathStack.tMap.get(maxTicketIdStr),
                     maxCountContent.indexOf("反") != -1 ? "正" + MathStack.hMap.get(maxTicketIdStr) : "反" + MathStack.tMap.get(maxTicketIdStr),
                     allSet, otherChoice);
-            System.out.println(choiceContent);
+            //if (Integer.valueOf(maxTicketIdStr) % 2 == 1) {//组合序号是双数
+                System.out.println(choiceContent);
+            //}
         } else {
             System.out.println("无预测的内容");
         }
-        System.out.println(futureTicketData.getPeriodNum() + "出=" + futureTicketData.getSpecial() +
-                ", 预测命中=" + maxSet.contains(futureTicketData.getSpecial()) + ", 全部命中=" + allSet.contains(futureTicketData.getSpecial()));
+        //预测的和全部出的数据相同的关系
+        Set<String> commonSet = new LinkedHashSet<>();
+        Iterator<String> commonIt = maxSet.iterator();
+        while (commonIt.hasNext()) {
+            String animal = commonIt.next();
+            if (futureTicketData.getAllAnimalSet().contains(animal)) {
+                commonSet.add(animal);
+            }
+        }
+        //if (Integer.valueOf(maxTicketIdStr) % 2 == 1) {//组合序号是双数
+            System.out.println(futureTicketData.getPeriodNum() + "出=" + futureTicketData.getSpecial() +
+                    ", 预测命中=" + maxSet.contains(futureTicketData.getSpecial()) + ", 全部命中=" + allSet.contains(futureTicketData.getSpecial()) +
+                    ", 生肖个数=" + futureTicketData.getAllAnimalSet().size() + ", 生肖详情=" + futureTicketData.getAllAnimalSet() +
+                    ", 相同的生肖=" + commonSet);
+        //}
         if (maxSet.contains(futureTicketData.getSpecial())) {
             basicOk ++;
         }

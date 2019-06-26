@@ -1,5 +1,8 @@
 package cn.liu.hui.peng.excel;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * @description: 彩票实体
  * @author: liuhp534
@@ -30,6 +33,8 @@ public class TicketData {
     private Integer deleted;
 
     private String createTime;
+
+    private Set<String> allAnimalSet = new LinkedHashSet<>();
 
     public Integer getPeriodNum() {
         return periodNum;
@@ -125,5 +130,20 @@ public class TicketData {
 
     public void setDeleted(Integer deleted) {
         this.deleted = deleted;
+    }
+
+    public Set<String> getAllAnimalSet() {
+        allAnimalSet.add(this.position1);
+        allAnimalSet.add(this.position2);
+        allAnimalSet.add(this.position3);
+        allAnimalSet.add(this.position4);
+        allAnimalSet.add(this.position5);
+        allAnimalSet.add(this.position6);
+        allAnimalSet.add(this.special);
+        return allAnimalSet;
+    }
+
+    public void setAllAnimalSet(Set<String> allAnimalSet) {
+        this.allAnimalSet = allAnimalSet;
     }
 }

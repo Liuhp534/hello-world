@@ -33,13 +33,38 @@ public class RecordHistorySeries {
 
     private static boolean createExcelFlag = Boolean.FALSE;//默认不打印excel
 
-    static String dataYearStart = "2018-01-01";
+    //获取正反相差数量的tree，2019年6月7日16:27:00 为了查看正反的极限偏差
+    static Map<String, String> countDifferMap = new TreeMap<>(new Comparator<String>() {
+        @Override
+        public int compare(String s1, String s2) {
+            String[] ss1 = s1.split("_");
+            String[] ss2 = s2.split("_");
+            if (Integer.valueOf(ss1[1]) > Integer.valueOf(ss2[1])) {
+                return -1;
+            } else if (Integer.valueOf(ss1[1]) < Integer.valueOf(ss2[1])) {
+                return 1;
+            } else {
+                if (Integer.valueOf(ss1[0]) > Integer.valueOf(ss2[0])) {
+                    return -1;
+                } else if (Integer.valueOf(ss1[0]) < Integer.valueOf(ss2[0])) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        }
+    });
+
+    static String dataYearStart = "2018-01-01到2018-07-01";
+
+    static int shiftCount = 1;
     /*初始化数据*/
     static {
-        String sql = "select * from ticket_data where create_time >= '" + dataYearStart + "'  order by period_num desc ";
+        //String sql = "select * from ticket_data where create_time >= '" + dataYearStart + "'  order by period_num desc ";
+        String sql = "select * from ticket_data where create_time >= '2018-01-01' and create_time < '2020-07-01'  order by period_num desc ";
         System.out.println(sql);
         ticketDatas = JdbcUtils.getAllBySql(sql);
-        MathStack.createHT(Boolean.FALSE);
+        MathStack.createHT(Boolean.FALSE, shiftCount);
         //key=期数+连续数+组合序号+序列号 value=组合序号+连续数
         keyComparator = new Comparator<String>() {
             @Override
@@ -111,13 +136,13 @@ public class RecordHistorySeries {
                 }
             }
         };
-        printTreeMap = new TreeMap<>(ignoreCountkeyComparator);
+        printTreeMap = new TreeMap<>(keyComparator);
     }
 
-    static int maxThreshold = 22;//最大能打印excel的连续出现期数的最大值
+    static int maxThreshold = 100;//最大能打印excel的连续出现期数的最大值
     public static void main(String[] args) throws Exception {
         //createExcelFlag = Boolean.TRUE;//这个可以生产excel
-        int threshold = 8;
+        int threshold = 6 + shiftCount;
         createAllRepeatResult(threshold);
     }
 
@@ -135,6 +160,15 @@ public class RecordHistorySeries {
         //配置打印的结构
         for (Map.Entry<String, Set<String>> hentry : hMap.entrySet()) {
             configAllRepeat(ticketDatas, hentry, threshold);
+        }
+        //打印相差的量
+        for (Map.Entry<String, String> entry : countDifferMap.entrySet()) {
+            String ticketIdStr = entry.getKey().split("_")[0];
+            int differCount = Integer.valueOf(entry.getKey().split("_")[1]);
+            if (differCount >= 13) {
+                //System.out.println(entry.getKey() + "=" + entry.getValue());
+                createExcel(dataYearStart, differCount + "_相差数量" + "_组合数_" + ticketIdStr, MathStack.hMap.get(ticketIdStr));
+            }
         }
 
         String ticketIdStr = "";
@@ -165,7 +199,7 @@ public class RecordHistorySeries {
                 //System.out.println(entry.getKey());
                 String startPeriod = entry.getKey().split("_")[0];
                 String entPeriod = Integer.valueOf(startPeriod) + Integer.valueOf(entry.getKey().split("_")[1]) - 1 + "";
-                System.out.println(entry.getKey() + "=" + entry.getValue() + "=" + startPeriod + "-" + entPeriod);
+               System.out.println(entry.getKey() + "=" + entry.getValue() + "=" + startPeriod + "-" + entPeriod);
                 if (createExcelFlag && threshold > 8) {
                     excelName = ticketCount + "_" + ticketIdStr + "预测2018数据统计连续最大值大于8期通过序号" + peroidNumStr + "_" + entry.getKey().split("_")[3];
                     createExcel(dataYearStart + "数据统计连续最大值大于" + threshold, excelName, MathStack.hMap.get(ticketIdStr));
@@ -189,8 +223,8 @@ public class RecordHistorySeries {
             }
         }
         for (Map.Entry<String, Integer> entry : yearMap.entrySet()) {
-            System.out.println(entry.getKey() + "，次数=" + entry.getValue() + "，概率=" + mathProportion(entry.getValue(),
-                    yearTotalMap.get(entry.getKey().split("\\|")[0])));
+            /*System.out.println(entry.getKey() + "，次数=" + entry.getValue() + "，概率=" + mathProportion(entry.getValue(),
+                    yearTotalMap.get(entry.getKey().split("\\|")[0])));*/
         }
         /*System.out.println(printTreeMap.size());
         System.out.println(allTreeMapCount);
@@ -213,9 +247,12 @@ public class RecordHistorySeries {
     private static void configAllRepeat(List<TicketData> ticketDatas, Map.Entry<String, Set<String>> hentry, int threshold) {
         String resulttemp = "";
         int resultcount = 1;
+        int hCount = 0;
+        int tCount = 0;
         for (int i = 0; i < ticketDatas.size(); i ++) {
             // 设置 id
             if (hentry.getValue().contains(ticketDatas.get(i).getSpecial())) {
+                hCount ++;
                 if ("正".equals(resulttemp)) {
                     resultcount ++;
                 } else if ("".equals(resulttemp)) {
@@ -232,6 +269,7 @@ public class RecordHistorySeries {
                     resulttemp = "正";
                 }
             } else {
+                tCount ++;
                 if ("反".equals(resulttemp)) {
                     resultcount ++;
                 } else if ("".equals(resulttemp)) {
@@ -249,6 +287,8 @@ public class RecordHistorySeries {
                 }
             }
         }
+        int tempCount =  (hCount - tCount) > 0 ? hCount - tCount : tCount - hCount;
+        countDifferMap.put(hentry.getKey() + "_" + tempCount, "正" + hCount + "_" + "反" + tCount);
     }
 
     /*输出统计excel*/
