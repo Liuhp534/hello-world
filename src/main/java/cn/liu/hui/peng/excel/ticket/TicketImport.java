@@ -64,7 +64,8 @@ public class TicketImport {
 
 
     public static void setObjs(int sheetNum) {
-        File file = new File("C:\\Users\\liuhp\\Desktop\\ticket\\ticketDataTemp.xls");
+        //File file = new File("C:\\Users\\liuhp\\Desktop\\ticket\\ticketDataTemp.xls");
+        File file = new File("E:\\201906_work\\ticket\\TicketImport.xls");
         // 获取excel文档
         POIFSFileSystem fs;
         HSSFWorkbook wb;

@@ -67,6 +67,12 @@ public class JdbcUtils {
                 ticketData = new TicketData();
                 ticketData.setId(rs.getInt(1));
                 ticketData.setPeriodNum(rs.getInt(2));
+                ticketData.setPosition1(rs.getString(4));
+                ticketData.setPosition2(rs.getString(5));
+                ticketData.setPosition3(rs.getString(6));
+                ticketData.setPosition4(rs.getString(7));
+                ticketData.setPosition5(rs.getString(8));
+                ticketData.setPosition6(rs.getString(9));
                 ticketData.setSpecial(rs.getString(10));
                 ticketDatas.add(ticketData);
             }
@@ -131,7 +137,7 @@ public class JdbcUtils {
         List<TicketData> ticketDatas = new ArrayList<>();
         TicketData ticketData = null;
         Connection conn = getConn();
-        String sql = "select * from ticket_data where deleted=0 order by period_num desc ";
+        String sql = "select * from ticket_data where create_time >= '2017-01-01' and deleted=0 order by period_num desc ";
         PreparedStatement pstmt;
         try {
             pstmt = (PreparedStatement)conn.prepareStatement(sql);
@@ -223,11 +229,19 @@ public class JdbcUtils {
         }
     }
 
+    private static boolean remote = Boolean.FALSE;
+
     private static Connection getConn() {
+        remote = true;
         String driver = "com.mysql.jdbc.Driver";
-        String url = "jdbc:mysql://localhost:3306/project";
+        String url = "jdbc:mysql://localhost:3306/project?characterEncoding=utf-8";
         String username = "root";
         String password = "123456";
+        if (remote) {
+            url = "jdbc:mysql://119.23.27.169:3306/project?characterEncoding=utf-8";
+            username = "root";
+            password = "#Liuhp1990";
+        }
         Connection conn = null;
         try {
             Class.forName(driver); //classLoader,加载对应驱动
