@@ -32,10 +32,18 @@ public class AnimalAndNumber {
     public static void main(String[] args) {
         String paramStr = "01,02,03,06,07,11,15,17,18,19,23,26,27,28,29,30,31,35,39,41,42,43,47,49";
 
-        test1(paramStr);
+        numberToAnimal(paramStr);
     }
 
-    private static void test1(String paramStr) {
+    public static void numberToAnimal(Set<String> paramSet) {
+        StringBuilder sb = new StringBuilder();
+        for (String str : paramSet) {
+            sb.append(str).append(",");
+        }
+        numberToAnimal(sb.toString());
+    }
+
+    public static void numberToAnimal(String paramStr) {
         Map<String, Set<String>> map1 = new LinkedHashMap<>();
         String[] str1 = paramStr.split(",");
         for (int i = 0; i < str1.length; i ++) {

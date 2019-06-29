@@ -19,6 +19,7 @@ public class CustomStringUtils {
 	list.add("d");
 	CustomStringUtils.print(list);
 	System.out.println(CustomStringUtils.isNumber("1231"));
+		System.out.println("2019001".substring(0, 4));
     }
     
     /**

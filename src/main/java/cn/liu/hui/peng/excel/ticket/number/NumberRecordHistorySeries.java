@@ -1,6 +1,9 @@
-package cn.liu.hui.peng.excel.ticket;
+package cn.liu.hui.peng.excel.ticket.number;
 
 import cn.liu.hui.peng.excel.TicketData;
+import cn.liu.hui.peng.excel.ticket.AnimalAndNumber;
+import cn.liu.hui.peng.excel.ticket.JdbcUtils;
+import cn.liu.hui.peng.excel.ticket.MathStack;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -18,7 +21,7 @@ import java.util.*;
  * @author: liuhp534
  * @create: 2019-05-29 20:17
  */
-public class RecordHistorySeries {
+public class NumberRecordHistorySeries {
 
     static Map<String, String> printTreeMap;//key=期数+连续数+组合序号+序列号 value=组合序号+连续数
 
@@ -104,17 +107,23 @@ public class RecordHistorySeries {
 
     static String dataYearStart = "2018-01-01到2018-07-01";
 
-    static int shiftCount = 0;//偏移量0-5
+    static int shiftCount = 8;//偏移量//0-11，0表示排除23or24个, 1表示21or22, 6表示11or12, 7表示9or10, 8表示7or8, 9表示5or6
 
     static int hitPosition = 3;//命中的位置1-7
     /*初始化数据*/
     static {
-        shiftThresholdMap.put(0, 5);
-        shiftThresholdMap.put(1, 7);
-        shiftThresholdMap.put(2, 8);
-        shiftThresholdMap.put(3, 8);
-        shiftThresholdMap.put(4, 1);
-        shiftThresholdMap.put(5, 13);
+        shiftThresholdMap.put(0, 12);
+        shiftThresholdMap.put(1, 11);
+        shiftThresholdMap.put(2, 10);
+        shiftThresholdMap.put(3, 9);
+        shiftThresholdMap.put(4, 8);
+        shiftThresholdMap.put(5, 7);
+        shiftThresholdMap.put(6, 7);
+        shiftThresholdMap.put(7, 5);
+        shiftThresholdMap.put(8, 4);
+        shiftThresholdMap.put(9, 3);
+        shiftThresholdMap.put(10, 3);
+        shiftThresholdMap.put(11, 3);
 
         yearMaxPeriod.put("2013", 2013152);
         yearMaxPeriod.put("2014", 2014152);
@@ -124,10 +133,10 @@ public class RecordHistorySeries {
         yearMaxPeriod.put("2018", 2018149);
         yearMaxPeriod.put("2019", 2019149);
         //String sql = "select * from ticket_data where create_time >= '" + dataYearStart + "'  order by period_num desc ";
-        String sql = "select * from ticket_data where create_time >= '2018-01-01' and create_time < '2020-07-01'  order by period_num desc ";
+        String sql = "select * from ticket_number_data where create_time >= '2018-01-01' and create_time < '2020-07-01'  order by period_num desc ";
         System.out.println(sql);
-        ticketDatas = JdbcUtils.getAllBySql(sql);
-        MathStack.createHT(Boolean.FALSE, shiftCount);
+        ticketDatas = NumberJdbcUtils.getAllBySql(sql);
+        NumberMathStack.createHT(Boolean.FALSE, shiftCount);
         //key=期数+连续数+组合序号+序列号 value=组合序号+连续数
         keyComparator = new Comparator<String>() {
             @Override
@@ -202,9 +211,7 @@ public class RecordHistorySeries {
         printTreeMap = new TreeMap<>(keyComparator);
     }
 
-    static int maxThreshold = 100;//最大能打印excel的连续出现期数的最大值
     public static void main(String[] args) throws Exception {
-        //createExcelFlag = Boolean.TRUE;//这个可以生产excel
         int threshold = shiftThresholdMap.get(shiftCount);
         createAllRepeatResult(threshold);
     }
@@ -214,26 +221,14 @@ public class RecordHistorySeries {
      * 还需要打印开始哪期的
      * */
     private static void createAllRepeatResult(int threshold) throws Exception {
-        /*if (threshold <= 6) {
-            return;
-        }*/
         //组合数，已经初始化
-        Map<String, Set<String>> hMap = MathStack.hMap;
-        Map<String, Set<String>> tMap = MathStack.tMap;
+        Map<String, Set<String>> hMap = NumberMathStack.hMap;
+        Map<String, Set<String>> tMap = NumberMathStack.tMap;
 
         //配置打印的结构
         for (Map.Entry<String, Set<String>> hentry : hMap.entrySet()) {
             configAllRepeat(ticketDatas, hentry, threshold);
         }
-        //打印相差的量，效果不佳
-        /*for (Map.Entry<String, String> entry : countDifferMap.entrySet()) {
-            String ticketIdStr = entry.getKey().split("_")[0];
-            int differCount = Integer.valueOf(entry.getKey().split("_")[1]);
-            if (differCount >= 13) {
-                //System.out.println(entry.getKey() + "=" + entry.getValue());
-                //createExcel(dataYearStart, differCount + "_相差数量" + "_组合数_" + ticketIdStr, MathStack.hMap.get(ticketIdStr));
-            }
-        }*/
 
         String ticketIdStr = "";
         int ticketCount = 0;
@@ -246,13 +241,6 @@ public class RecordHistorySeries {
             ticketCount = Integer.valueOf(entry.getKey().split("_")[1]);//连续数
             ticketIdStr = entry.getKey().split("_")[2];//组合数
             if (ticketCount >= threshold) {
-                //获取同一个组合，同样数量的情况
-                /*if (null != commonMap.get(entry.getValue())) {
-                    Integer i1 = commonMap.get(entry.getValue());
-                    commonMap.put(entry.getValue(), i1 + 1);
-                } else {
-                    commonMap.put(entry.getValue(), 1);
-                }*/
                 //统计年份+连续数的数量
                 if (null != yearMap.get(peroidNumStr.substring(0, 4) + "|" + ticketCount)) {
                     yearMap.put(peroidNumStr.substring(0, 4) + "|" + ticketCount,
@@ -279,11 +267,6 @@ public class RecordHistorySeries {
                 } else {
                     System.out.println(entry.getKey() + "=" + entry.getValue() + "=" + startPeriod + "-" + entPeriod);
                 }
-                //创建excel
-                /*if (createExcelFlag && threshold > 8) {
-                    excelName = ticketCount + "_" + ticketIdStr + "预测2018数据统计连续最大值大于8期通过序号" + peroidNumStr + "_" + entry.getKey().split("_")[3];
-                    createExcel(dataYearStart + "数据统计连续最大值大于" + threshold, excelName, MathStack.hMap.get(ticketIdStr));
-                }*/
             }
         }
         //输出汇总结果
@@ -300,14 +283,11 @@ public class RecordHistorySeries {
                             maxDetail.split("_")[1] + "_" +  entry.getKey() + "--------------------------");
                     if (increasePeriodDetail) {
                         result = entry.getValue().toArray()[0].toString();//只输出第一个；
-                        if (result.indexOf("正") != -1) {//说明需要选择反
-                            hValueSet = tMap.get(result.split("=")[0].split("_")[2]);
-                        } else {
-                            hValueSet = hMap.get(result.split("=")[0].split("_")[2]);
-                        }
+                        hValueSet = hMap.get(result.split("=")[0].split("_")[2]);
                         System.out.println(result + "=" + hValueSet);
+                        AnimalAndNumber.numberToAnimal(hValueSet);
                         /*for (String str : entry.getValue()) {
-                            System.out.println(str);
+                            System.out.println(str + "=" + hMap.get(str.split("=")[0].split("_")[2]));
                         }*/
                     }
                 }
@@ -317,25 +297,17 @@ public class RecordHistorySeries {
                     System.out.println("----------------------------------------------------" + entry.getKey() + "--------------------------");
                     if (increasePeriodDetail) {
                         result = entry.getValue().toArray()[0].toString();//只输出第一个；
-                        if (result.indexOf("正") != -1) {//说明需要选择反
-                            hValueSet = tMap.get(result.split("=")[0].split("_")[2]);
-                        } else {
-                            hValueSet = hMap.get(result.split("=")[0].split("_")[2]);
-                        }
+                        hValueSet = hMap.get(result.split("=")[0].split("_")[2]);
                         System.out.println(result + "=" + hValueSet);
+                        AnimalAndNumber.numberToAnimal(hValueSet);
                         /*for (String str : entry.getValue()) {
-                           System.out.println(str);
+                            System.out.println(str + "=" + hMap.get(str.split("=")[0].split("_")[2]));
                         }*/
                     }
 
                 }
             }
         }
-        /*for (Map.Entry<String, Integer> entry : commonMap.entrySet()) {
-            if (entry.getValue() > 1) {
-                //System.out.println(entry.getKey() + "_" + entry.getValue());
-            }
-        }*/
         int temp = 0;//验证是否数据量匹配上了
         Map<String, Integer> yearTotalMap = new HashMap<>();
         for (Map.Entry<String, Integer> entry : yearMap.entrySet()) {
@@ -347,36 +319,16 @@ public class RecordHistorySeries {
                 yearTotalMap.put(entry.getKey().split("\\|")[0], entry.getValue());
             }
         }
-
-        //出现次数的概率
-        /*for (Map.Entry<String, Integer> entry : yearMap.entrySet()) {
-            System.out.println(entry.getKey() + "，次数=" + entry.getValue() + "，概率=" + mathProportion(entry.getValue(),
-                    yearTotalMap.get(entry.getKey().split("\\|")[0])));
-        }*/
         System.out.println(temp);
-    }
-
-    /*计算比例*/
-    private static Double mathProportion(int basicCount, int totalCount) {
-        BigDecimal basicDecimal = new BigDecimal(basicCount);
-        BigDecimal allDecimal = new BigDecimal(totalCount);
-        // 使用四舍五入模式，保留两位小数，注意模式HALF_UP
-        MathContext mc = new MathContext(20, RoundingMode.HALF_UP);
-        Double basicChance = basicDecimal.divide(allDecimal, mc).doubleValue();
-        //System.out.println(basicCount + "_" + totalCount + "_" + basicChance);
-        return basicChance;
     }
 
     /*计算每种组合出现连续中的次数，当达到threshold阈值的时候print*/
     private static void configAllRepeat(List<TicketData> ticketDatas, Map.Entry<String, Set<String>> hentry, int threshold) {
         String resulttemp = "";
         int resultcount = 1;
-       /* int hCount = 0;
-        int tCount = 0;*/
         for (int i = 0; i < ticketDatas.size(); i ++) {
             // 设置 id
             if (hentry.getValue().contains(getHitResult(ticketDatas.get(i)))) {
-                //hCount ++;
                 if ("正".equals(resulttemp)) {
                     resultcount ++;
                 } else if ("".equals(resulttemp)) {
@@ -384,16 +336,14 @@ public class RecordHistorySeries {
                     resulttemp = "正";
                 } else if ("反".equals(resulttemp)) {//处于反的统计中，到这里表示断开了
                     if (resultcount >= threshold) {
-                        //System.out.println(ticketDatas.get(i).getPeriodNum() + "-" + hentry.getKey()+"_"+resultcount);
-                        allTreeMapCount ++;
+                        /*allTreeMapCount ++;
                         printTreeMap.put(ticketDatas.get(i-1).getPeriodNum() + "_" + resultcount +"_"+hentry.getKey() + "_" + allTreeMapCount,
-                                "反" + resultcount +"_"+ hentry.getKey());
+                                "反" + resultcount +"_"+ hentry.getKey());*/
                     }
                     resultcount = 1;
                     resulttemp = "正";
                 }
             } else {
-                //tCount ++;
                 if ("反".equals(resulttemp)) {
                     resultcount ++;
                 } else if ("".equals(resulttemp)) {
@@ -401,7 +351,6 @@ public class RecordHistorySeries {
                     resulttemp = "反";
                 } else if ("正".equals(resulttemp)) {//处于正的统计中，到这里表示断开了
                     if (resultcount >= threshold) {
-                        //System.out.println(ticketDatas.get(i).getPeriodNum() + "-" + hentry.getKey()+"_"+resultcount);
                         allTreeMapCount ++;
                         printTreeMap.put(ticketDatas.get(i-1).getPeriodNum()   + "_" + resultcount +"_"+hentry.getKey() + "_" + allTreeMapCount,
                                 "正" + resultcount +"_"+ hentry.getKey());
@@ -411,9 +360,6 @@ public class RecordHistorySeries {
                 }
             }
         }
-        //正反之差，效果不佳
-        /*int tempCount =  (hCount - tCount) > 0 ? hCount - tCount : tCount - hCount;
-        countDifferMap.put(hentry.getKey() + "_" + tempCount, "正" + hCount + "_" + "反" + tCount);*/
     }
 
 
@@ -444,113 +390,7 @@ public class RecordHistorySeries {
         }
     }
 
-    /*输出统计excel*/
-    private static void createExcel(String num, String excelName, Set<String> paramSet) throws Exception {
-        if (!createExcelFlag) {
-            return;
-        }
-        String[] excelHeaders = {"id", "期数", "结果合并", "结果", "次数", "连续"};
-        //创建Excel对象
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        //创建工作表单
-        HSSFSheet sheet = workbook.createSheet("结果");
-        //创建HSSFRow对象 （行）
-        HSSFRow excelRow = sheet.createRow(0);
-        //创建HSSFCell对象  （单元格）
-        HSSFCell cell = null;
-        for (int i = 0; i < excelHeaders.length; i++) {
-            cell = excelRow.createCell(i);
-            cell.setCellValue(excelHeaders[i]);
-        }
-        int row = 1;
-        String lxtemp = "";
-        int lxcount = 1;
-        String resulttemp = "";
-        int resultcount = 1;
-        for (int i = 0; i < ticketDatas.size(); i ++) {
-            excelRow = sheet.createRow(row);
-            row++;
-            // 设置 id
-            cell = excelRow.createCell(0);
-            cell.setCellValue(ticketDatas.get(i).getId());
-            // 设置 id
-            cell = excelRow.createCell(1);
-            cell.setCellValue(ticketDatas.get(i).getPeriodNum());
-            // 设置 id
-            cell = excelRow.createCell(2);
-            if (paramSet.contains(getHitResult(ticketDatas.get(i)))) {
-                if ("正".equals(resulttemp)) {
-                    resultcount ++;
-                    if (resultcount >= 2) {
-                        for (int j = 2; j <= resultcount; j ++) {
-                            sheet.getRow(row - j).getCell(2).setCellValue("正" + resultcount);
-                            sheet.getRow(row - j).getCell(3).setCellValue("正");
-                            sheet.getRow(row - j).getCell(4).setCellValue(resultcount+"");
-                        }
-                    }
-                    cell.setCellValue("正" + resultcount);
-                    cell = excelRow.createCell(3);
-                    cell.setCellValue("正");
-                    cell = excelRow.createCell(4);
-                    cell.setCellValue(resultcount+"");
-                } else {
-                    resultcount = 1;
-                    cell.setCellValue("正" + resultcount);
-                    cell = excelRow.createCell(3);
-                    cell.setCellValue("正");
-                    cell = excelRow.createCell(4);
-                    cell.setCellValue(resultcount+"");
-                    resulttemp = "正";
-                }
-            } else {
-                if ("反".equals(resulttemp)) {
-                    resultcount ++;
-                    if (resultcount >= 2) {
-                        for (int j = 2; j <= resultcount; j ++) {
-                            sheet.getRow(row - j).getCell(2).setCellValue("反" + resultcount);
-                            sheet.getRow(row - j).getCell(3).setCellValue("反");
-                            sheet.getRow(row - j).getCell(4).setCellValue(resultcount+"");
-                        }
-                    }
-                    cell.setCellValue("反" + resultcount);
-                    cell = excelRow.createCell(3);
-                    cell.setCellValue("反");
-                    cell = excelRow.createCell(4);
-                    cell.setCellValue(resultcount+"");
-                } else {
-                    resultcount = 1;
-                    cell.setCellValue("反" + resultcount);
-                    cell = excelRow.createCell(3);
-                    cell.setCellValue("反");
-                    cell = excelRow.createCell(4);
-                    cell.setCellValue(resultcount+"");
-                    resulttemp = "反";
-                }
-            }
-            if (lxtemp.equals(getHitResult(ticketDatas.get(i)))) {
-                lxcount ++;
-                if (lxcount >= 2) {
-                    for (int j = 2; j <= lxcount; j ++) {
-                        sheet.getRow(row - j).getCell(5).setCellValue("连续" + getHitResult(ticketDatas.get(i)) + lxcount);
-                    }
-                }
-                cell = excelRow.createCell(5);
-                cell.setCellValue("连续" + getHitResult(ticketDatas.get(i)) + lxcount);
-            } else {
-                lxtemp = getHitResult(ticketDatas.get(i));
-                lxcount = 1;
-                cell = excelRow.createCell(5);
-                cell.setCellValue("");
-            }
-        }
-        File file = new File("C:\\Users\\liuhp\\Desktop\\ticket\\连续数据统计\\" +num );
-        if (!file.exists()) {
-            file.mkdir();
-        }
-        file = new File("C:\\Users\\liuhp\\Desktop\\ticket\\连续数据统计\\" +num + "\\" + excelName + ".xls");
 
-        workbook.write(new FileOutputStream(file));
-    }
 
 
 
