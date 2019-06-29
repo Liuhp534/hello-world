@@ -57,21 +57,74 @@ public class RecordHistorySeries {
 
     static Map<Integer, Integer> shiftThresholdMap = new HashMap<>();//配置偏移量显示的深度
 
+    static Map<String, Integer> yearMaxPeriod = new HashMap<>();//记录每年的最大值
+
+    static Map<String, Set<String>> increasePeriodMap = new TreeMap<>(new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+            if (Integer.valueOf(o1) > Integer.valueOf(o2)) {
+                return -1;
+            } else if (Integer.valueOf(o1) < Integer.valueOf(o2)) {
+                return 1;
+            }
+            return 0;
+        }
+    });//记录期数的汇总情况，将范围内的汇合到一起
+    static boolean increasePeriodPrintFlag = Boolean.TRUE;//默认执行操作
+
+    static Map<String, Set<String>> increasePeriodCountMap = new TreeMap<>(new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {//先按照年，然后次数，然后期数14_2019072
+            String[] sts1 = o1.split("_");
+            String[] sts2 = o2.split("_");
+            if (Integer.valueOf(sts1[1].substring(0, 4)) > Integer.valueOf(sts2[1].substring(0, 4))) {
+                return -1;
+            } else if (Integer.valueOf(sts1[1].substring(0, 4)) < Integer.valueOf(sts2[1].substring(0, 4))) {
+                return 1;
+            } else {
+                if (Integer.valueOf(sts1[0]) > Integer.valueOf(sts2[0])) {
+                    return -1;
+                } else if (Integer.valueOf(sts1[0]) < Integer.valueOf(sts2[0])) {
+                    return 1;
+                } else {
+                    if (Integer.valueOf(sts1[1]) > Integer.valueOf(sts2[1])) {
+                        return -1;
+                    } else if (Integer.valueOf(sts1[1]) < Integer.valueOf(sts2[1])) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                }
+            }
+        }
+    });//记录期数的汇总情况，将范围内的汇合到一起，并且按照最大的优先排序
+    static boolean increasePeriodCountPrintFlag = Boolean.FALSE;//默认执行操作
+
+    static boolean increasePeriodDetail = Boolean.FALSE;//默认执行操作,是否打印范围汇合详情
+
     static String dataYearStart = "2018-01-01到2018-07-01";
 
-    static int shiftCount = 0;//偏移量0-5
+    static int shiftCount = 4;//偏移量0-5
 
-    static int hitPosition = 3;//命中的位置1-7
+    static int hitPosition = 7;//命中的位置1-7
     /*初始化数据*/
     static {
-        shiftThresholdMap.put(0, 8);
-        shiftThresholdMap.put(1, 9);
-        shiftThresholdMap.put(2, 11);
-        shiftThresholdMap.put(3, 12);
-        shiftThresholdMap.put(4, 12);
+        shiftThresholdMap.put(0, 5);
+        shiftThresholdMap.put(1, 7);
+        shiftThresholdMap.put(2, 8);
+        shiftThresholdMap.put(3, 8);
+        shiftThresholdMap.put(4, 1);
         shiftThresholdMap.put(5, 13);
+
+        yearMaxPeriod.put("2013", 2013152);
+        yearMaxPeriod.put("2014", 2014152);
+        yearMaxPeriod.put("2015", 2015152);
+        yearMaxPeriod.put("2016", 2016151);
+        yearMaxPeriod.put("2017", 2017153);
+        yearMaxPeriod.put("2018", 2018149);
+        yearMaxPeriod.put("2019", 2019149);
         //String sql = "select * from ticket_data where create_time >= '" + dataYearStart + "'  order by period_num desc ";
-        String sql = "select * from ticket_data where create_time >= '2017-01-01' and create_time < '2020-07-01'  order by period_num desc ";
+        String sql = "select * from ticket_data where create_time >= '2018-01-01' and create_time < '2020-07-01'  order by period_num desc ";
         System.out.println(sql);
         ticketDatas = JdbcUtils.getAllBySql(sql);
         MathStack.createHT(Boolean.FALSE, shiftCount);
@@ -164,6 +217,7 @@ public class RecordHistorySeries {
         /*if (threshold <= 6) {
             return;
         }*/
+        //组合数，已经初始化
         Map<String, Set<String>> hMap = MathStack.hMap;
         Map<String, Set<String>> tMap = MathStack.tMap;
 
@@ -171,15 +225,15 @@ public class RecordHistorySeries {
         for (Map.Entry<String, Set<String>> hentry : hMap.entrySet()) {
             configAllRepeat(ticketDatas, hentry, threshold);
         }
-        //打印相差的量
-        for (Map.Entry<String, String> entry : countDifferMap.entrySet()) {
+        //打印相差的量，效果不佳
+        /*for (Map.Entry<String, String> entry : countDifferMap.entrySet()) {
             String ticketIdStr = entry.getKey().split("_")[0];
             int differCount = Integer.valueOf(entry.getKey().split("_")[1]);
             if (differCount >= 13) {
                 //System.out.println(entry.getKey() + "=" + entry.getValue());
                 //createExcel(dataYearStart, differCount + "_相差数量" + "_组合数_" + ticketIdStr, MathStack.hMap.get(ticketIdStr));
             }
-        }
+        }*/
 
         String ticketIdStr = "";
         int ticketCount = 0;
@@ -189,16 +243,16 @@ public class RecordHistorySeries {
         String excelName;
         for (Map.Entry<String, String> entry : printTreeMap.entrySet()) {
             peroidNumStr = entry.getKey().split("_")[0];//期数
-            ticketIdStr = entry.getKey().split("_")[2];//组合数
             ticketCount = Integer.valueOf(entry.getKey().split("_")[1]);//连续数
-            if (ticketCount >= threshold && ticketCount < maxThreshold) {
+            ticketIdStr = entry.getKey().split("_")[2];//组合数
+            if (ticketCount >= threshold) {
                 //获取同一个组合，同样数量的情况
-                if (null != commonMap.get(entry.getValue())) {
+                /*if (null != commonMap.get(entry.getValue())) {
                     Integer i1 = commonMap.get(entry.getValue());
                     commonMap.put(entry.getValue(), i1 + 1);
                 } else {
                     commonMap.put(entry.getValue(), 1);
-                }
+                }*/
                 //统计年份+连续数的数量
                 if (null != yearMap.get(peroidNumStr.substring(0, 4) + "|" + ticketCount)) {
                     yearMap.put(peroidNumStr.substring(0, 4) + "|" + ticketCount,
@@ -206,21 +260,66 @@ public class RecordHistorySeries {
                 } else {
                     yearMap.put(peroidNumStr.substring(0, 4) + "|" + ticketCount, 1);
                 }
-                //System.out.println(entry.getKey());
+                //计算起始位置需要，但是跨年的需要特殊处理
                 String startPeriod = entry.getKey().split("_")[0];
                 String entPeriod = Integer.valueOf(startPeriod) + Integer.valueOf(entry.getKey().split("_")[1]) - 1 + "";
-                System.out.println(entry.getKey() + "=" + entry.getValue() + "=" + startPeriod + "-" + entPeriod);
-                if (createExcelFlag && threshold > 8) {
+                if (Integer.valueOf(entPeriod) > Integer.valueOf(yearMaxPeriod.get(entPeriod.substring(0, 4)))) {
+                    int overYearIncrement = Integer.valueOf(entPeriod) - Integer.valueOf(yearMaxPeriod.get(entPeriod.substring(0, 4)));
+                    entPeriod = (Integer.valueOf(entPeriod.substring(0, 4)) + 1) * 1000 + overYearIncrement + "";
+                }
+                if (increasePeriodPrintFlag) {
+                    if (increasePeriodMap.get(entPeriod) != null) {
+                        Set<String> set = increasePeriodMap.get(entPeriod);
+                        set.add(entry.getKey() + "=" + entry.getValue() + "=" + startPeriod + "-" + entPeriod);
+                    } else {
+                        Set<String> set = new LinkedHashSet<>();
+                        set.add(entry.getKey() + "=" + entry.getValue() + "=" + startPeriod + "-" + entPeriod);
+                        increasePeriodMap.put(entPeriod, set);
+                    }
+                } else {
+                    System.out.println(entry.getKey() + "=" + entry.getValue() + "=" + startPeriod + "-" + entPeriod);
+                }
+                //创建excel
+                /*if (createExcelFlag && threshold > 8) {
                     excelName = ticketCount + "_" + ticketIdStr + "预测2018数据统计连续最大值大于8期通过序号" + peroidNumStr + "_" + entry.getKey().split("_")[3];
-                    //createExcel(dataYearStart + "数据统计连续最大值大于" + threshold, excelName, MathStack.hMap.get(ticketIdStr));
+                    createExcel(dataYearStart + "数据统计连续最大值大于" + threshold, excelName, MathStack.hMap.get(ticketIdStr));
+                }*/
+            }
+        }
+        //输出汇总结果
+        if (increasePeriodPrintFlag) {
+            for (Map.Entry<String, Set<String>> entry : increasePeriodMap.entrySet()) {
+                if (increasePeriodCountPrintFlag) {
+                    String maxDetail = (String) entry.getValue().toArray()[0];
+                    increasePeriodCountMap.put(maxDetail.split("_")[1] + "_" + entry.getKey(), entry.getValue());
+                } else {
+                    String maxDetail = (String) entry.getValue().toArray()[0];
+                    System.out.println("----------------------------------------------------" + (maxDetail.split("_")[1].length() == 1 ? "0" : "") +
+                            maxDetail.split("_")[1] + "_" +  entry.getKey() + "--------------------------");
+                    if (increasePeriodDetail) {
+                        for (String str : entry.getValue()) {
+                            System.out.println(str);
+                        }
+                    }
+                }
+            }
+            if (increasePeriodCountPrintFlag) {
+                for (Map.Entry<String, Set<String>> entry : increasePeriodCountMap.entrySet()) {
+                    System.out.println("----------------------------------------------------" + entry.getKey() + "--------------------------");
+                    if (increasePeriodDetail) {
+                        for (String str : entry.getValue()) {
+                           System.out.println(str);
+                        }
+                    }
+
                 }
             }
         }
-        for (Map.Entry<String, Integer> entry : commonMap.entrySet()) {
+        /*for (Map.Entry<String, Integer> entry : commonMap.entrySet()) {
             if (entry.getValue() > 1) {
                 //System.out.println(entry.getKey() + "_" + entry.getValue());
             }
-        }
+        }*/
         int temp = 0;//验证是否数据量匹配上了
         Map<String, Integer> yearTotalMap = new HashMap<>();
         for (Map.Entry<String, Integer> entry : yearMap.entrySet()) {
@@ -232,13 +331,12 @@ public class RecordHistorySeries {
                 yearTotalMap.put(entry.getKey().split("\\|")[0], entry.getValue());
             }
         }
-        for (Map.Entry<String, Integer> entry : yearMap.entrySet()) {
-            /*System.out.println(entry.getKey() + "，次数=" + entry.getValue() + "，概率=" + mathProportion(entry.getValue(),
-                    yearTotalMap.get(entry.getKey().split("\\|")[0])));*/
-        }
-        /*System.out.println(printTreeMap.size());
-        System.out.println(allTreeMapCount);
-        System.out.println(temp);*/
+
+        //出现次数的概率
+        /*for (Map.Entry<String, Integer> entry : yearMap.entrySet()) {
+            System.out.println(entry.getKey() + "，次数=" + entry.getValue() + "，概率=" + mathProportion(entry.getValue(),
+                    yearTotalMap.get(entry.getKey().split("\\|")[0])));
+        }*/
         System.out.println(temp);
     }
 
@@ -257,12 +355,12 @@ public class RecordHistorySeries {
     private static void configAllRepeat(List<TicketData> ticketDatas, Map.Entry<String, Set<String>> hentry, int threshold) {
         String resulttemp = "";
         int resultcount = 1;
-        int hCount = 0;
-        int tCount = 0;
+       /* int hCount = 0;
+        int tCount = 0;*/
         for (int i = 0; i < ticketDatas.size(); i ++) {
             // 设置 id
             if (hentry.getValue().contains(getHitResult(ticketDatas.get(i)))) {
-                hCount ++;
+                //hCount ++;
                 if ("正".equals(resulttemp)) {
                     resultcount ++;
                 } else if ("".equals(resulttemp)) {
@@ -279,7 +377,7 @@ public class RecordHistorySeries {
                     resulttemp = "正";
                 }
             } else {
-                tCount ++;
+                //tCount ++;
                 if ("反".equals(resulttemp)) {
                     resultcount ++;
                 } else if ("".equals(resulttemp)) {
@@ -297,8 +395,9 @@ public class RecordHistorySeries {
                 }
             }
         }
-        int tempCount =  (hCount - tCount) > 0 ? hCount - tCount : tCount - hCount;
-        countDifferMap.put(hentry.getKey() + "_" + tempCount, "正" + hCount + "_" + "反" + tCount);
+        //正反之差，效果不佳
+        /*int tempCount =  (hCount - tCount) > 0 ? hCount - tCount : tCount - hCount;
+        countDifferMap.put(hentry.getKey() + "_" + tempCount, "正" + hCount + "_" + "反" + tCount);*/
     }
 
 
