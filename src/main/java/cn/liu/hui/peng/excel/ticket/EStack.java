@@ -66,7 +66,7 @@ public class EStack<E> {
         }
     }
 
-    private static final int default_capacity = 16;
+    private static final int default_capacity = 32;
 
     private int size;
 
