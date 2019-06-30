@@ -332,9 +332,13 @@ public class RecordHistorySeries {
                 }
             }
             if (increasePeriodCountPrintFlag) {
+                String maxDetail = "";//只输出第一个；
                 for (Map.Entry<String, Set<String>> entry : increasePeriodCountMap.entrySet()) {
                     if (!printPeriodNumBreak) {
                         System.out.println("----------------------------------------------------" + entry.getKey() + "--------------------------");
+                    }
+                    if ("".equals(maxDetail)) {
+                        maxDetail = (String) entry.getValue().toArray()[0];//获取最大的；
                     }
                     if (increasePeriodDetail) {
                         sortNum ++;
@@ -350,7 +354,7 @@ public class RecordHistorySeries {
                                 }
                                 if (printPeriodNum.equals(entry.getKey().split("_")[1])) {
                                     System.out.println("----------------------------------------------------" + entry.getKey() + "--------------------------");
-                                    System.out.println(result);
+                                    System.out.println(result + ", 最大值=" + maxDetail.split("=")[0].split("_")[1]);
                                     break;
                                 }
                             }

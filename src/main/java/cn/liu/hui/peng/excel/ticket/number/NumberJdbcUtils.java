@@ -51,7 +51,7 @@ public class NumberJdbcUtils {
     }
 
     /*获取所有的数据无视删除状态，更具期数排序，降序*/
-    public static List<TicketData> getAllBySql(String sql) {
+    public static List<TicketData> getAllBySql(String sql, boolean printFlag) {
         List<TicketData> ticketDatas = new ArrayList<>();
         TicketData ticketData = null;
         Connection conn = getConn();
@@ -60,7 +60,9 @@ public class NumberJdbcUtils {
             pstmt = (PreparedStatement)conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();
             int col = rs.getMetaData().getColumnCount();
-            System.out.println("=============获取数据开始===============");
+            if (printFlag) {
+                System.out.println("=============获取数据开始===============");
+            }
             while (rs.next()) {
                 ticketData = new TicketData();
                 ticketData.setId(rs.getInt(1));
@@ -74,8 +76,10 @@ public class NumberJdbcUtils {
                 ticketData.setSpecial(rs.getString(10));
                 ticketDatas.add(ticketData);
             }
-            System.out.println("=============获取数据总量=" +  ticketDatas.size()+ "===============");
-            System.out.println("=============获取数据结束===============");
+            if (printFlag) {
+                System.out.println("=============获取数据总量=" +  ticketDatas.size()+ "===============");
+                System.out.println("=============获取数据结束===============");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

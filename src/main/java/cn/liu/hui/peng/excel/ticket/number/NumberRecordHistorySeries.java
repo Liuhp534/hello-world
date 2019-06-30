@@ -115,7 +115,7 @@ public class NumberRecordHistorySeries {
 
     static boolean increasePeriodDetail = Boolean.TRUE;//默认执行操作,是否打印范围汇合详情
 
-    static String printPeriodNum = "";//如果有值，只输出该值
+    static String printPeriodNum = "2019073";//如果有值，只输出该值
 
     static int shiftCount = 7;//偏移量//0-11，0表示排除23or24个, 1表示21or22, 6表示11or12, 7表示9or10, 8表示7or8, 9表示5or6
 
@@ -144,8 +144,8 @@ public class NumberRecordHistorySeries {
         yearMaxPeriod.put("2019", 2019149);
         //String sql = "select * from ticket_data where create_time >= '" + dataYearStart + "'  order by period_num desc ";
         String sql = "select * from ticket_number_data where create_time >= '2018-01-01' and create_time < '2020-07-01'  order by period_num desc ";
-        System.out.println(sql);
-        ticketDatas = NumberJdbcUtils.getAllBySql(sql);
+        //System.out.println(sql);
+        ticketDatas = NumberJdbcUtils.getAllBySql(sql, Boolean.FALSE);
         NumberMathStack.createHT(Boolean.FALSE, shiftCount);
         printTreeMap = new TreeMap<>(keyComparator);//核心的数据存储map
         //需要重置的
@@ -284,9 +284,13 @@ public class NumberRecordHistorySeries {
                 }
             }
             if (increasePeriodCountPrintFlag) {
+                String maxDetail = "";//只输出第一个；
                 for (Map.Entry<String, Set<String>> entry : increasePeriodCountMap.entrySet()) {
                     if (!printPeriodNumBreak) {
                         System.out.println("----------------------------------------------------" + entry.getKey() + "--------------------------");
+                    }
+                    if ("".equals(maxDetail)) {
+                        maxDetail = (String) entry.getValue().toArray()[0];//获取最大的；
                     }
                     if (increasePeriodDetail) {
                         sortNum ++;
@@ -294,7 +298,8 @@ public class NumberRecordHistorySeries {
                             for (String str : entry.getValue()) {
                                 if (printPeriodNum.equals(entry.getKey().split("_")[1])) {
                                     System.out.println("----------------------------------------------------" + entry.getKey() + "--------------------------");
-                                    System.out.println(str + "=" + hMap.get(str.split("=")[0].split("_")[2]) + ", 历史排=" + sortNum);
+                                    System.out.println(str + "=排除" + hMap.get(str.split("=")[0].split("_")[2]) + ", 历史排=" + sortNum +
+                                            ", 最大值=" + maxDetail.split("=")[0].split("_")[1]);
                                     hValueSet = hMap.get(str.split("=")[0].split("_")[2]);
                                     AnimalAndNumber.numberToAnimal(hValueSet);
                                     break;

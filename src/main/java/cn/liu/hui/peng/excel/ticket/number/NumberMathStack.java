@@ -12,9 +12,9 @@ import java.util.*;
 public class NumberMathStack {
 
     static int cnt = 0;
-    static EStack<Integer> s = new EStack<Integer>();
-    public static Map<String, Set<String>> hMap = new LinkedHashMap<>();
-    public  static Map<String, Set<String>> tMap = new LinkedHashMap<>();
+    static EStack<Integer> s = null;
+    public static Map<String, Set<String>> hMap = null;
+    public  static Map<String, Set<String>> tMap = null;
     static Set<String> allSet =
             new LinkedHashSet<>(Arrays.asList("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12",
                     "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"));//25个里面分成两堆
@@ -65,7 +65,7 @@ public class NumberMathStack {
             cnt++;
             hMap.put(cnt + "", s.getH());
             tMap.put(cnt + "", s.getT(allSet));
-            System.out.println(cnt);
+            /*System.out.println(cnt);*/
             return;
         }
 
@@ -88,9 +88,9 @@ public class NumberMathStack {
 
     public static void createHT(boolean isPrint, int shiftCount) {
         cnt = 0;
-        //s = new EStack<Integer>();
-        tMap.clear();
-        hMap.clear();
+        s = new EStack<Integer>();
+        tMap = new LinkedHashMap<>();
+        hMap = new LinkedHashMap<>();
         kase3(0, 0, 13 + shiftCount, 25);
         Map<String, Set<String>> tempTMap = tMap;
         tMap = convertNumber(hMap);
