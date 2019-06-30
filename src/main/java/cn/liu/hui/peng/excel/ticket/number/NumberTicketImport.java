@@ -30,7 +30,7 @@ public class NumberTicketImport {
     public static void main(String[] args) throws IOException {
         //解析数据
         setObjs(0);
-        setObjs(1);
+        /*setObjs(1);
         setObjs(2);
         setObjs(3);
         setObjs(4);
@@ -39,7 +39,7 @@ public class NumberTicketImport {
         setObjs(7);
         setObjs(8);
         setObjs(9);
-        setObjs(10);
+        setObjs(10);*/
         System.out.println(ticketDatas.size());
         Collections.sort(ticketDatas, new Comparator<TicketData>() {
             @Override
@@ -59,7 +59,7 @@ public class NumberTicketImport {
 
 
     public static void setObjs(int sheetNum) {
-        File file = new File("C:\\Users\\liuhp\\Desktop\\ticket\\旧操作\\ticketData.xls");
+        File file = new File("C:\\Users\\liuhp\\Desktop\\ticket\\ticketDataTemp.xls");
         //File file = new File("E:\\201906_work\\ticket\\TicketImport.xls");
         // 获取excel文档
         POIFSFileSystem fs;

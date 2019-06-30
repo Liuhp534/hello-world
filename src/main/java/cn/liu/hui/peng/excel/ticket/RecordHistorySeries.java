@@ -22,14 +22,81 @@ public class RecordHistorySeries {
 
     static Map<String, String> printTreeMap;//key=期数+连续数+组合序号+序列号 value=组合序号+连续数
 
-    /*历史数据*/
-    static List<TicketData> ticketDatas;
+    static List<TicketData> ticketDatas;/*历史数据*/
 
     static int allTreeMapCount = 0;//为了防止重叠的
 
-    static Comparator<String> keyComparator;
+    static Comparator<String> keyComparator = new Comparator<String>() {
+        @Override
+        public int compare(String s1, String s2) {
+            String[] ss1 = s1.split("_");
+            String[] ss2 = s2.split("_");
+            if (Integer.valueOf(ss1[0].substring(0, 4)).intValue() > Integer.valueOf(ss2[0].substring(0, 4)).intValue()) {//比较年份
+                return -1;
+            } else if (Integer.valueOf(ss1[0].substring(0, 4)).intValue() < Integer.valueOf(ss2[0].substring(0, 4)).intValue()) {
+                return 1;
+            } else {
+                if (Integer.valueOf(ss1[1]).intValue() > Integer.valueOf(ss2[1]).intValue()) {//如果相等，则比较前面那个数据，比较数量
+                    return -1;
+                } else if (Integer.valueOf(ss1[1]).intValue() < Integer.valueOf(ss2[1]).intValue()) {
+                    return 1;
+                } else {
+                    if (Integer.valueOf(ss1[0]).intValue() > Integer.valueOf(ss2[0]).intValue()) {//起始位置，比较
+                        return -1;
+                    } else if (Integer.valueOf(ss1[0]).intValue() < Integer.valueOf(ss2[0]).intValue()) {
+                        return 1;
+                    } else {
+                        if (Integer.valueOf(ss1[2]).intValue() > Integer.valueOf(ss2[2]).intValue()) {//比较组合序号
+                            return -1;
+                        } else if (Integer.valueOf(ss1[2]).intValue() < Integer.valueOf(ss2[2]).intValue()) {
+                            return 1;
+                        } else {
+                            if (Integer.valueOf(ss1[3]).intValue() > Integer.valueOf(ss2[3]).intValue()) {//比较序列号
+                                return -1;
+                            } else if (Integer.valueOf(ss1[3]).intValue() < Integer.valueOf(ss2[3]).intValue()) {
+                                return 1;
+                            } else {
+                                return 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };;
 
-    static Comparator<String> ignoreCountkeyComparator;
+    static Comparator<String> ignoreCountkeyComparator = new Comparator<String>() {
+        @Override
+        public int compare(String s1, String s2) {
+            String[] ss1 = s1.split("_");
+            String[] ss2 = s2.split("_");
+            if (Integer.valueOf(ss1[0].substring(0, 4)).intValue() > Integer.valueOf(ss2[0].substring(0, 4)).intValue()) {//比较年份
+                return -1;
+            } else if (Integer.valueOf(ss1[0].substring(0, 4)).intValue() < Integer.valueOf(ss2[0].substring(0, 4)).intValue()) {
+                return 1;
+            } else {
+                if (Integer.valueOf(ss1[0]).intValue() > Integer.valueOf(ss2[0]).intValue()) {//起始位置，比较
+                    return -1;
+                } else if (Integer.valueOf(ss1[0]).intValue() < Integer.valueOf(ss2[0]).intValue()) {
+                    return 1;
+                } else {
+                    if (Integer.valueOf(ss1[2]).intValue() > Integer.valueOf(ss2[2]).intValue()) {//比较组合序号
+                        return -1;
+                    } else if (Integer.valueOf(ss1[2]).intValue() < Integer.valueOf(ss2[2]).intValue()) {
+                        return 1;
+                    } else {
+                        if (Integer.valueOf(ss1[3]).intValue() > Integer.valueOf(ss2[3]).intValue()) {//比较序列号
+                            return -1;
+                        } else if (Integer.valueOf(ss1[3]).intValue() < Integer.valueOf(ss2[3]).intValue()) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
+    };;
 
     private static boolean createExcelFlag = Boolean.FALSE;//默认不打印excel
 
@@ -59,61 +126,30 @@ public class RecordHistorySeries {
 
     static Map<String, Integer> yearMaxPeriod = new HashMap<>();//记录每年的最大值
 
-    static Map<String, Set<String>> increasePeriodMap = new TreeMap<>(new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {
-            if (Integer.valueOf(o1) > Integer.valueOf(o2)) {
-                return -1;
-            } else if (Integer.valueOf(o1) < Integer.valueOf(o2)) {
-                return 1;
-            }
-            return 0;
-        }
-    });//记录期数的汇总情况，将范围内的汇合到一起
+    static Map<String, Set<String>> increasePeriodMap = null;//记录期数的汇总情况，将范围内的汇合到一起
     static boolean increasePeriodPrintFlag = Boolean.TRUE;//默认执行操作
 
-    static Map<String, Set<String>> increasePeriodCountMap = new TreeMap<>(new Comparator<String>() {
-        @Override
-        public int compare(String o1, String o2) {//先按照年，然后次数，然后期数14_2019072
-            String[] sts1 = o1.split("_");
-            String[] sts2 = o2.split("_");
-            if (Integer.valueOf(sts1[1].substring(0, 4)) > Integer.valueOf(sts2[1].substring(0, 4))) {
-                return -1;
-            } else if (Integer.valueOf(sts1[1].substring(0, 4)) < Integer.valueOf(sts2[1].substring(0, 4))) {
-                return 1;
-            } else {
-                if (Integer.valueOf(sts1[0]) > Integer.valueOf(sts2[0])) {
-                    return -1;
-                } else if (Integer.valueOf(sts1[0]) < Integer.valueOf(sts2[0])) {
-                    return 1;
-                } else {
-                    if (Integer.valueOf(sts1[1]) > Integer.valueOf(sts2[1])) {
-                        return -1;
-                    } else if (Integer.valueOf(sts1[1]) < Integer.valueOf(sts2[1])) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                }
-            }
-        }
-    });//记录期数的汇总情况，将范围内的汇合到一起，并且按照最大的优先排序
-    static boolean increasePeriodCountPrintFlag = Boolean.TRUE;//默认执行操作
+    static Map<String, Set<String>> increasePeriodCountMap = null;//记录期数的汇总情况，将范围内的汇合到一起，并且按照最大的优先排序
+    static boolean increasePeriodCountPrintFlag = Boolean.FALSE;//默认执行操作
 
     static boolean increasePeriodDetail = Boolean.TRUE;//默认执行操作,是否打印范围汇合详情
 
     static String dataYearStart = "2018-01-01到2018-07-01";
 
+    static String printPeriodNum = "";//如果有值，只输出该值
+
     static int shiftCount = 0;//偏移量0-5
 
-    static int hitPosition = 3;//命中的位置1-7
-    /*初始化数据*/
-    static {
+    static int hitPosition = 1;//命中的位置1-7
+    /*初始化数据
+    * 所有的数据都要初始化
+    * */
+    private static void init() {
         shiftThresholdMap.put(0, 5);
         shiftThresholdMap.put(1, 7);
         shiftThresholdMap.put(2, 8);
-        shiftThresholdMap.put(3, 8);
-        shiftThresholdMap.put(4, 1);
+        shiftThresholdMap.put(3, 9);
+        shiftThresholdMap.put(4, 10);
         shiftThresholdMap.put(5, 13);
 
         yearMaxPeriod.put("2013", 2013152);
@@ -125,90 +161,68 @@ public class RecordHistorySeries {
         yearMaxPeriod.put("2019", 2019149);
         //String sql = "select * from ticket_data where create_time >= '" + dataYearStart + "'  order by period_num desc ";
         String sql = "select * from ticket_data where create_time >= '2018-01-01' and create_time < '2020-07-01'  order by period_num desc ";
-        System.out.println(sql);
-        ticketDatas = JdbcUtils.getAllBySql(sql);
+        //System.out.println(sql);
+        ticketDatas = JdbcUtils.getAllBySql(sql, Boolean.FALSE);
         MathStack.createHT(Boolean.FALSE, shiftCount);
         //key=期数+连续数+组合序号+序列号 value=组合序号+连续数
-        keyComparator = new Comparator<String>() {
-            @Override
-            public int compare(String s1, String s2) {
-                String[] ss1 = s1.split("_");
-                String[] ss2 = s2.split("_");
-                if (Integer.valueOf(ss1[0].substring(0, 4)).intValue() > Integer.valueOf(ss2[0].substring(0, 4)).intValue()) {//比较年份
-                    return -1;
-                } else if (Integer.valueOf(ss1[0].substring(0, 4)).intValue() < Integer.valueOf(ss2[0].substring(0, 4)).intValue()) {
-                    return 1;
-                } else {
-                    if (Integer.valueOf(ss1[1]).intValue() > Integer.valueOf(ss2[1]).intValue()) {//如果相等，则比较前面那个数据，比较数量
-                        return -1;
-                    } else if (Integer.valueOf(ss1[1]).intValue() < Integer.valueOf(ss2[1]).intValue()) {
-                        return 1;
-                    } else {
-                        if (Integer.valueOf(ss1[0]).intValue() > Integer.valueOf(ss2[0]).intValue()) {//起始位置，比较
-                            return -1;
-                        } else if (Integer.valueOf(ss1[0]).intValue() < Integer.valueOf(ss2[0]).intValue()) {
-                            return 1;
-                        } else {
-                            if (Integer.valueOf(ss1[2]).intValue() > Integer.valueOf(ss2[2]).intValue()) {//比较组合序号
-                                return -1;
-                            } else if (Integer.valueOf(ss1[2]).intValue() < Integer.valueOf(ss2[2]).intValue()) {
-                                return 1;
-                            } else {
-                                if (Integer.valueOf(ss1[3]).intValue() > Integer.valueOf(ss2[3]).intValue()) {//比较序列号
-                                    return -1;
-                                } else if (Integer.valueOf(ss1[3]).intValue() < Integer.valueOf(ss2[3]).intValue()) {
-                                    return 1;
-                                } else {
-                                    return 0;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        };
-        ignoreCountkeyComparator = new Comparator<String>() {
-            @Override
-            public int compare(String s1, String s2) {
-                String[] ss1 = s1.split("_");
-                String[] ss2 = s2.split("_");
-                if (Integer.valueOf(ss1[0].substring(0, 4)).intValue() > Integer.valueOf(ss2[0].substring(0, 4)).intValue()) {//比较年份
-                    return -1;
-                } else if (Integer.valueOf(ss1[0].substring(0, 4)).intValue() < Integer.valueOf(ss2[0].substring(0, 4)).intValue()) {
-                    return 1;
-                } else {
-                    if (Integer.valueOf(ss1[0]).intValue() > Integer.valueOf(ss2[0]).intValue()) {//起始位置，比较
-                        return -1;
-                    } else if (Integer.valueOf(ss1[0]).intValue() < Integer.valueOf(ss2[0]).intValue()) {
-                        return 1;
-                    } else {
-                        if (Integer.valueOf(ss1[2]).intValue() > Integer.valueOf(ss2[2]).intValue()) {//比较组合序号
-                            return -1;
-                        } else if (Integer.valueOf(ss1[2]).intValue() < Integer.valueOf(ss2[2]).intValue()) {
-                            return 1;
-                        } else {
-                            if (Integer.valueOf(ss1[3]).intValue() > Integer.valueOf(ss2[3]).intValue()) {//比较序列号
-                                return -1;
-                            } else if (Integer.valueOf(ss1[3]).intValue() < Integer.valueOf(ss2[3]).intValue()) {
-                                return 1;
-                            } else {
-                                return 0;
-                            }
-                        }
-                    }
-                }
-            }
-        };
         printTreeMap = new TreeMap<>(keyComparator);
+        //需要重新为空的
+        allTreeMapCount = 0;
+        createExcelFlag = Boolean.FALSE;//默认不打印excel
+        increasePeriodMap = new TreeMap<>(new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                if (Integer.valueOf(o1) > Integer.valueOf(o2)) {
+                    return -1;
+                } else if (Integer.valueOf(o1) < Integer.valueOf(o2)) {
+                    return 1;
+                }
+                return 0;
+            }
+        });//记录期数的汇总情况，将范围内的汇合到一起
+        increasePeriodCountMap = new TreeMap<>(new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {//先按照年，然后次数，然后期数14_2019072
+                String[] sts1 = o1.split("_");
+                String[] sts2 = o2.split("_");
+                if (Integer.valueOf(sts1[1].substring(0, 4)) > Integer.valueOf(sts2[1].substring(0, 4))) {
+                    return -1;
+                } else if (Integer.valueOf(sts1[1].substring(0, 4)) < Integer.valueOf(sts2[1].substring(0, 4))) {
+                    return 1;
+                } else {
+                    if (Integer.valueOf(sts1[0]) > Integer.valueOf(sts2[0])) {
+                        return -1;
+                    } else if (Integer.valueOf(sts1[0]) < Integer.valueOf(sts2[0])) {
+                        return 1;
+                    } else {
+                        if (Integer.valueOf(sts1[1]) > Integer.valueOf(sts2[1])) {
+                            return -1;
+                        } else if (Integer.valueOf(sts1[1]) < Integer.valueOf(sts2[1])) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            }
+        });//记录期数的汇总情况，将范围内的汇合到一起，并且按照最大的优先排序
     }
 
     static int maxThreshold = 100;//最大能打印excel的连续出现期数的最大值
     public static void main(String[] args) throws Exception {
         //createExcelFlag = Boolean.TRUE;//这个可以生产excel
-        int threshold = shiftThresholdMap.get(shiftCount);
-        createAllRepeatResult(threshold);
+        init();
+        createAllRepeatResult(shiftThresholdMap.get(shiftCount));
     }
 
+    /*计算每种组合的最大出现数
+     * 能够更具指定时间内的数据，将所有组合出现的次数统计一遍，并生产excel
+     * 还需要打印开始哪期的
+     * */
+    public static void createAllRepeatResult() throws Exception {
+        init();
+        createAllRepeatResult(shiftThresholdMap.get(shiftCount));
+    }
     /*计算每种组合的最大出现数
      * 能够更具指定时间内的数据，将所有组合出现的次数统计一遍，并生产excel
      * 还需要打印开始哪期的
@@ -288,8 +302,13 @@ public class RecordHistorySeries {
         }
         //输出汇总结果
         if (increasePeriodPrintFlag) {
-            String result = "";
-            Set<String> hValueSet = null;
+            String result = "";//关键数据字段
+            Set<String> hValueSet = null;//指向选择的结果
+            int sortNum = 0;//排序情况，前提是按照最大连续排序才有效果
+            boolean printPeriodNumBreak = Boolean.FALSE;//如果指定了打印的期数，后续是否需要执行
+            if (!"".equals(printPeriodNum)) {
+                printPeriodNumBreak = Boolean.TRUE;
+            }
             for (Map.Entry<String, Set<String>> entry : increasePeriodMap.entrySet()) {
                 if (increasePeriodCountPrintFlag) {
                     String maxDetail = (String) entry.getValue().toArray()[0];
@@ -314,20 +333,42 @@ public class RecordHistorySeries {
             }
             if (increasePeriodCountPrintFlag) {
                 for (Map.Entry<String, Set<String>> entry : increasePeriodCountMap.entrySet()) {
-                    System.out.println("----------------------------------------------------" + entry.getKey() + "--------------------------");
-                    if (increasePeriodDetail) {
-                        result = entry.getValue().toArray()[0].toString();//只输出第一个；
-                        if (result.indexOf("正") != -1) {//说明需要选择反
-                            hValueSet = tMap.get(result.split("=")[0].split("_")[2]);
-                        } else {
-                            hValueSet = hMap.get(result.split("=")[0].split("_")[2]);
-                        }
-                        System.out.println(result + "=" + hValueSet);
-                        /*for (String str : entry.getValue()) {
-                           System.out.println(str);
-                        }*/
+                    if (!printPeriodNumBreak) {
+                        System.out.println("----------------------------------------------------" + entry.getKey() + "--------------------------");
                     }
-
+                    if (increasePeriodDetail) {
+                        sortNum ++;
+                        if (printPeriodNumBreak) {
+                            for (String str : entry.getValue()) {
+                                result = str;
+                                if (result.indexOf("正") != -1) {//说明需要选择反
+                                    hValueSet = tMap.get(result.split("=")[0].split("_")[2]);
+                                    result = result + "=反" + hValueSet + ", 历史排=" + sortNum;
+                                } else {
+                                    hValueSet = hMap.get(result.split("=")[0].split("_")[2]);
+                                    result = result + "=正" + hValueSet + ", 历史排=" + sortNum;
+                                }
+                                if (printPeriodNum.equals(entry.getKey().split("_")[1])) {
+                                    System.out.println("----------------------------------------------------" + entry.getKey() + "--------------------------");
+                                    System.out.println(result);
+                                    break;
+                                }
+                            }
+                            if (printPeriodNum.equals(entry.getKey().split("_")[1])) {
+                                break;
+                            }
+                        } else {
+                            result = entry.getValue().toArray()[0].toString();//只输出第一个；
+                            if (result.indexOf("正") != -1) {//说明需要选择反
+                                hValueSet = tMap.get(result.split("=")[0].split("_")[2]);
+                                result = result + "=反" + hValueSet;
+                            } else {
+                                hValueSet = hMap.get(result.split("=")[0].split("_")[2]);
+                                result = result + "=正" + hValueSet;
+                            }
+                            System.out.println(result);
+                        }
+                    }
                 }
             }
         }
@@ -353,7 +394,7 @@ public class RecordHistorySeries {
             System.out.println(entry.getKey() + "，次数=" + entry.getValue() + "，概率=" + mathProportion(entry.getValue(),
                     yearTotalMap.get(entry.getKey().split("\\|")[0])));
         }*/
-        System.out.println(temp);
+        System.out.println("数据量量=" + temp + ", 位置=" + hitPosition + ", 偏移量=" + shiftCount);
     }
 
     /*计算比例*/

@@ -65,7 +65,7 @@ public class NumberMathStack {
             cnt++;
             hMap.put(cnt + "", s.getH());
             tMap.put(cnt + "", s.getT(allSet));
-            //System.out.println(cnt);
+            System.out.println(cnt);
             return;
         }
 
@@ -82,44 +82,15 @@ public class NumberMathStack {
         }
     }
 
-
-    /*分堆数量一致需要去重，正反相同那么去除*/
-    private static void configHT() {
-        Set<String> deleteKey = new HashSet<String>();
-        for (Map.Entry<String, Set<String>> hentry : hMap.entrySet()) {
-            for (Map.Entry<String, Set<String>> tentry : tMap.entrySet()) {
-                if (isCommon(hentry.getValue(), tentry.getValue())) {//正反相同那么去除
-                    if (deleteKey.contains(hentry.getKey())) {//如果包含在删除的范围内则跳过
-                        continue;
-                    }
-                    deleteKey.add(tentry.getKey());
-                }
-            }
-        }
-        for (String str : deleteKey) {
-            hMap.remove(str);
-            tMap.remove(str);
-        }
-    }
-
-    /*判断正反是否相同*/
-    private static boolean isCommon(Set<String> hSet, Set<String> tSet) {
-        boolean flag = false;
-        int count = 0;
-        for (String h : hSet) {
-            if (tSet.contains(h)) {
-                continue;
-            }
-            return false;
-        }
-        return true;
-    }
-
     public static void createHT(boolean isPrint) {
         createHT(isPrint, 0);
     }
 
     public static void createHT(boolean isPrint, int shiftCount) {
+        cnt = 0;
+        //s = new EStack<Integer>();
+        tMap.clear();
+        hMap.clear();
         kase3(0, 0, 13 + shiftCount, 25);
         Map<String, Set<String>> tempTMap = tMap;
         tMap = convertNumber(hMap);
@@ -147,7 +118,7 @@ public class NumberMathStack {
 
     public static void main(String[] args){
         long start = System.currentTimeMillis();
-        createHT(true, 6);//0-11
+        createHT(true, 7);//0-11, 0的组合=5200300， 6=177100=24秒，7=53130=6秒
         System.out.println((System.currentTimeMillis() - start)/1000 + " 秒");
     }
 
