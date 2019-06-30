@@ -33,7 +33,9 @@ public class HistoryTicketCalculate {
 
     private static boolean createExcelFlag = Boolean.FALSE;
 
-    static int shiftCount = 1;
+    static int shiftCount = 0;
+
+    static int hitPosition = 7;//命中的位置1-7
     /*初始化数据*/
     static {
         MathStack.createHT(false, shiftCount);//初始化组合数据
@@ -129,9 +131,11 @@ public class HistoryTicketCalculate {
     private static void configResult(List<TicketData> ticketDatas, Map.Entry<String, Set<String>> hentry) {
         String resulttemp = "";
         int resultcount = 1;
+        String nowAnimal = "";//当前的出的生肖
         for (int i = 0; i < ticketDatas.size(); i ++) {
+            nowAnimal = getHitResult(ticketDatas.get(i));
             // 设置 id
-            if (hentry.getValue().contains(ticketDatas.get(i).getSpecial())) {
+            if (hentry.getValue().contains(nowAnimal)) {
                 if ("正".equals(resulttemp)) {
                     resultcount ++;
                 } else if ("".equals(resulttemp)) {
@@ -222,16 +226,17 @@ public class HistoryTicketCalculate {
                 commonSet.add(animal);
             }
         }
+        String nowAnimal = getHitResult(futureTicketData);//当前的出的生肖
         //if (Integer.valueOf(maxTicketIdStr) % 2 == 1) {//组合序号是双数
-            System.out.println(futureTicketData.getPeriodNum() + "出=" + futureTicketData.getSpecial() +
-                    ", 预测命中=" + maxSet.contains(futureTicketData.getSpecial()) + ", 全部命中=" + allSet.contains(futureTicketData.getSpecial()) +
+            System.out.println(futureTicketData.getPeriodNum() + "出=" + nowAnimal +
+                    ", 预测命中=" + maxSet.contains(nowAnimal) + ", 全部命中=" + allSet.contains(nowAnimal) +
                     ", 生肖个数=" + futureTicketData.getAllAnimalSet().size() + ", 生肖详情=" + futureTicketData.getAllAnimalSet() +
                     ", 相同的生肖=" + commonSet);
         //}
-        if (maxSet.contains(futureTicketData.getSpecial())) {
+        if (maxSet.contains(nowAnimal)) {
             basicOk ++;
         }
-        if (allSet.contains(futureTicketData.getSpecial())) {
+        if (allSet.contains(nowAnimal)) {
             allOk ++;
         }
 
@@ -257,7 +262,9 @@ public class HistoryTicketCalculate {
         int lxcount = 1;
         String resulttemp = "";
         int resultcount = 1;
+        String nowAnimal = "";//当前的出的生肖
        for (int i = 0; i < historyTicketDatas.size(); i ++) {
+           nowAnimal = getHitResult(historyTicketDatas.get(i));
            excelRow = sheet.createRow(row);
            row++;
            // 设置 id
@@ -268,7 +275,7 @@ public class HistoryTicketCalculate {
            cell.setCellValue(historyTicketDatas.get(i).getPeriodNum());
            // 设置 id
            cell = excelRow.createCell(2);
-           if (paramSet.contains(historyTicketDatas.get(i).getSpecial())) {
+           if (paramSet.contains(nowAnimal)) {
                if ("正".equals(resulttemp)) {
                    resultcount ++;
                    if (resultcount >= 2) {
@@ -317,17 +324,17 @@ public class HistoryTicketCalculate {
                    resulttemp = "反";
                }
            }
-           if (lxtemp.equals(historyTicketDatas.get(i).getSpecial())) {
+           if (lxtemp.equals(nowAnimal)) {
                lxcount ++;
                if (lxcount >= 2) {
                    for (int j = 2; j <= lxcount; j ++) {
-                       sheet.getRow(row - j).getCell(5).setCellValue("连续" + historyTicketDatas.get(i).getSpecial() + lxcount);
+                       sheet.getRow(row - j).getCell(5).setCellValue("连续" + nowAnimal + lxcount);
                    }
                }
                cell = excelRow.createCell(5);
-               cell.setCellValue("连续" + historyTicketDatas.get(i).getSpecial() + lxcount);
+               cell.setCellValue("连续" + nowAnimal + lxcount);
            } else {
-               lxtemp = historyTicketDatas.get(i).getSpecial();
+               lxtemp = nowAnimal;
                lxcount = 1;
                cell = excelRow.createCell(5);
                cell.setCellValue("");
@@ -346,7 +353,32 @@ public class HistoryTicketCalculate {
 
 
 
-
+    /*根据位置信息获取命中的数据hitPosition*/
+    private static String getHitResult(TicketData nowTicketData) {
+        switch (hitPosition) {
+            case 1:
+                return nowTicketData.getPosition1();
+            case 2:
+                return nowTicketData.getPosition2();
+            case 3:
+                return nowTicketData.getPosition3();
+            case 4:
+                return nowTicketData.getPosition4();
+            case 5:
+                return nowTicketData.getPosition5();
+            case 6:
+                return nowTicketData.getPosition6();
+            case 7:
+                return nowTicketData.getSpecial();
+            default:
+                System.out.println("----------------");
+                System.out.println("----------------");
+                System.out.println("-------位置错误---------");
+                System.out.println("----------------");
+                System.out.println("----------------");
+                return null;
+        }
+    }
 
 
 

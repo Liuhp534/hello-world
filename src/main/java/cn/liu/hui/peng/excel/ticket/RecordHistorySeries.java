@@ -134,7 +134,7 @@ public class RecordHistorySeries {
 
     static boolean increasePeriodDetail = Boolean.TRUE;//默认执行操作,是否打印范围汇合详情
 
-    static String dataYearStart = "2018-01-01到2018-07-01";
+    static String dataYearStart = "2016-01-01";
 
     static String printPeriodNum = "";//如果有值，只输出该值
 
@@ -145,7 +145,7 @@ public class RecordHistorySeries {
     * 所有的数据都要初始化
     * */
     private static void init() {
-        shiftThresholdMap.put(0, 5);
+        shiftThresholdMap.put(0, 1);
         shiftThresholdMap.put(1, 7);
         shiftThresholdMap.put(2, 8);
         shiftThresholdMap.put(3, 9);
@@ -159,8 +159,8 @@ public class RecordHistorySeries {
         yearMaxPeriod.put("2017", 2017153);
         yearMaxPeriod.put("2018", 2018149);
         yearMaxPeriod.put("2019", 2019149);
-        //String sql = "select * from ticket_data where create_time >= '" + dataYearStart + "'  order by period_num desc ";
-        String sql = "select * from ticket_data where create_time >= '2018-01-01' and create_time < '2020-07-01'  order by period_num desc ";
+        String sql = "select * from ticket_data where create_time >= '" + dataYearStart + "'  order by period_num desc ";
+        //String sql = "select * from ticket_data where create_time >= '2016-01-01' and create_time < '2020-07-01'  order by period_num desc ";
         //System.out.println(sql);
         ticketDatas = JdbcUtils.getAllBySql(sql, Boolean.FALSE);
         MathStack.createHT(Boolean.FALSE, shiftCount);
@@ -309,14 +309,22 @@ public class RecordHistorySeries {
             if (!"".equals(printPeriodNum)) {
                 printPeriodNumBreak = Boolean.TRUE;
             }
+            //-------------------2019年6月30日21:14:36
+            int printCount = 0;//有多少个连续的就输出多少个“-”
+            String printCountTemp = "";
             for (Map.Entry<String, Set<String>> entry : increasePeriodMap.entrySet()) {
                 if (increasePeriodCountPrintFlag) {
                     String maxDetail = (String) entry.getValue().toArray()[0];
                     increasePeriodCountMap.put(maxDetail.split("_")[1] + "_" + entry.getKey(), entry.getValue());
                 } else {
                     String maxDetail = (String) entry.getValue().toArray()[0];
-                    System.out.println("----------------------------------------------------" + (maxDetail.split("_")[1].length() == 1 ? "0" : "") +
-                            maxDetail.split("_")[1] + "_" +  entry.getKey() + "--------------------------");
+                    printCount = Integer.valueOf(maxDetail.split("_")[1]);
+                    for (int k = 0; k < printCount; k ++) {
+                        printCountTemp += "----";
+                    }
+                    System.out.println((maxDetail.split("_")[1].length() == 1 ? "0" : "") +
+                            maxDetail.split("_")[1] + "_" +  entry.getKey() + printCountTemp);
+                    printCountTemp = "";
                     if (increasePeriodDetail) {
                         result = entry.getValue().toArray()[0].toString();//只输出第一个；
                         if (result.indexOf("正") != -1) {//说明需要选择反
@@ -335,7 +343,12 @@ public class RecordHistorySeries {
                 String maxDetail = "";//只输出第一个；
                 for (Map.Entry<String, Set<String>> entry : increasePeriodCountMap.entrySet()) {
                     if (!printPeriodNumBreak) {
-                        System.out.println("----------------------------------------------------" + entry.getKey() + "--------------------------");
+                        printCount = Integer.valueOf(entry.getKey().split("_")[0]);
+                        for (int k = 0; k < printCount; k ++) {
+                            printCountTemp += "-";
+                        }
+                        System.out.println(printCountTemp + entry.getKey() + "--------------------------");
+                        printCountTemp = "";
                     }
                     if ("".equals(maxDetail)) {
                         maxDetail = (String) entry.getValue().toArray()[0];//获取最大的；

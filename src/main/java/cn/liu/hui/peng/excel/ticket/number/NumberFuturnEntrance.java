@@ -12,7 +12,9 @@ public class NumberFuturnEntrance {
         String printPeriodNum = "2019073";
         //allState(5, 7, printPeriodNum);
         //fixPosition(printPeriodNum);
-        fixShiftCount(7, printPeriodNum);
+        //0-11, 0的组合=5200300， 6=177100=24秒，7=53130=6秒，一般7以上
+        //偏移量//0-11，0表示排除23or24个, 1表示21or22, 5表示13or14, 6表示11or12, 7表示9or10, 8表示7or8, 9表示5or6
+        fixShiftCount(8, printPeriodNum);
     }
 
     /*
