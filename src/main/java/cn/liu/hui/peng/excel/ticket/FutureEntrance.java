@@ -7,27 +7,31 @@ package cn.liu.hui.peng.excel.ticket;
  */
 public class FutureEntrance {
 
+
     public static void main(String[] args) throws Exception {
+        JdbcUtils.remote = Boolean.FALSE;
+        long start = System.currentTimeMillis();
         positionPrint();
+        System.out.println("耗时：" + (System.currentTimeMillis() - start));
     }
 
     private static void positionPrint() {
-        String dataYearStart= "2016-01-01";
+        String dataYearStart= "2018-01-01";
         boolean increasePeriodPrintFlag = true;
         boolean increasePeriodCountPrintFlag = false;
         boolean increasePeriodDetail = false;
-        allState(dataYearStart,0, 7, "", increasePeriodPrintFlag, increasePeriodCountPrintFlag, increasePeriodDetail);
+        allState(dataYearStart,0, 3, "", increasePeriodPrintFlag, increasePeriodCountPrintFlag, increasePeriodDetail);
     }
 
     private static void allPrint() {
-         String printPeriodNum = "2019073";
+        String printPeriodNum = "2019073";
         String dataYearStart= "2018-01-01";
         fixPosition(dataYearStart, printPeriodNum);
     }
 
     /*
-    * 变动偏移量
-    * */
+     * 变动偏移量
+     * */
     private static void fixPosition(String dataYearStart, String printPeriodNum) {
         System.out.println("                         || ||                        ");
         System.out.println("                         || ||                        ");
@@ -74,6 +78,7 @@ public class FutureEntrance {
             RecordHistorySeries.printPeriodNum = printPeriodNum;//指定打印哪期，不指定打印全部
             RecordHistorySeries.createAllRepeatResult();
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("------------------------------------出错了-----------------------------");
         }
     }

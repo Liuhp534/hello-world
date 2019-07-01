@@ -142,15 +142,15 @@ public class RecordHistorySeries {
 
     static int hitPosition = 1;//命中的位置1-7
     /*初始化数据
-    * 所有的数据都要初始化
-    * */
+     * 所有的数据都要初始化
+     * */
     private static void init() {
         shiftThresholdMap.put(0, 1);
-        shiftThresholdMap.put(1, 7);
-        shiftThresholdMap.put(2, 8);
-        shiftThresholdMap.put(3, 9);
-        shiftThresholdMap.put(4, 10);
-        shiftThresholdMap.put(5, 13);
+        shiftThresholdMap.put(1, 1);
+        shiftThresholdMap.put(2, 1);
+        shiftThresholdMap.put(3, 1);//9
+        shiftThresholdMap.put(4, 1);//10
+        shiftThresholdMap.put(5, 1);//13
 
         yearMaxPeriod.put("2013", 2013152);
         yearMaxPeriod.put("2014", 2014152);
@@ -302,6 +302,10 @@ public class RecordHistorySeries {
         }
         //输出汇总结果
         if (increasePeriodPrintFlag) {
+            //获取预测结果
+            HistoryTicketCalculate.shiftCount = shiftCount;
+            HistoryTicketCalculate.hitPosition = hitPosition;//命中的位置1-7
+            HistoryTicketCalculate.historyCalculate();
             String result = "";//关键数据字段
             Set<String> hValueSet = null;//指向选择的结果
             int sortNum = 0;//排序情况，前提是按照最大连续排序才有效果
@@ -320,10 +324,15 @@ public class RecordHistorySeries {
                     String maxDetail = (String) entry.getValue().toArray()[0];
                     printCount = Integer.valueOf(maxDetail.split("_")[1]);
                     for (int k = 0; k < printCount; k ++) {
-                        printCountTemp += "----";
+                        printCountTemp += "---";
+                        if (k == 8) {
+                            printCountTemp += "|";
+                        }
                     }
+                    //  + HistoryTicketCalculate.historyResultMap.get(entry.getKey().split("_")[1])
                     System.out.println((maxDetail.split("_")[1].length() == 1 ? "0" : "") +
-                            maxDetail.split("_")[1] + "_" +  entry.getKey() + printCountTemp);
+                            maxDetail.split("_")[1] + "_" +  entry.getKey() + printCountTemp +
+                            HistoryTicketCalculate.historyResultMap.get(entry.getKey()));// + entry.getValue().toArray()[0]
                     printCountTemp = "";
                     if (increasePeriodDetail) {
                         result = entry.getValue().toArray()[0].toString();//只输出第一个；
@@ -347,7 +356,8 @@ public class RecordHistorySeries {
                         for (int k = 0; k < printCount; k ++) {
                             printCountTemp += "-";
                         }
-                        System.out.println(printCountTemp + entry.getKey() + "--------------------------");
+                        System.out.println(printCountTemp + entry.getKey() + "--------------------------" +
+                                HistoryTicketCalculate.historyResultMap.get(entry.getKey()));
                         printCountTemp = "";
                     }
                     if ("".equals(maxDetail)) {

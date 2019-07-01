@@ -33,12 +33,13 @@ public class HistoryTicketCalculate {
 
     private static boolean createExcelFlag = Boolean.FALSE;
 
-    static int shiftCount = 0;
+    static Map<String, Boolean> historyResultMap = null;
+
+    static int shiftCount = 4;
 
     static int hitPosition = 7;//命中的位置1-7
     /*初始化数据*/
     static {
-        MathStack.createHT(false, shiftCount);//初始化组合数据
         Comparator<String> negativeComparator = new Comparator<String>() {
             @Override
             public int compare(String s1, String s2) {//s1 > s2 返回1是升序，s1 > s2 返回-1是降序
@@ -63,13 +64,26 @@ public class HistoryTicketCalculate {
     }
 
     public static void main(String[] args) throws Exception {
-        //预测开始期数2019059，预测期数2（没有那么多预测时退出）,预测深度就连续出现的阈值6
-        long start = System.currentTimeMillis();
-        JdbcUtils.repeatAllData();//先修复所有数据正常态
-        //createExcelFlag = Boolean.TRUE;
-        multiple(2018001, Integer.MAX_VALUE, 6 + shiftCount);
-        JdbcUtils.repeatAllData();//先修复所有数据正常态
-        System.out.println("耗时=" + (System.currentTimeMillis() - start));
+
+    }
+
+    /*
+    * 预测
+    * */
+    public static void historyCalculate() {
+        try {
+            //预测开始期数2019059，预测期数2（没有那么多预测时退出）,预测深度就连续出现的阈值6
+            long start = System.currentTimeMillis();
+            MathStack.createHT(false, shiftCount);//初始化组合数据
+            JdbcUtils.repeatAllData();//先修复所有数据正常态
+            //createExcelFlag = Boolean.TRUE;
+            historyResultMap = new HashMap<>();//预测结果
+            multiple(2018001, Integer.MAX_VALUE, 6 + shiftCount);
+            JdbcUtils.repeatAllData();//先修复所有数据正常态
+            System.out.println("耗时=" + (System.currentTimeMillis() - start));
+        } catch (Exception e) {
+            System.out.println("-------------------预测出错了-------------------");
+        }
     }
 
     /*多次预测*/
@@ -115,6 +129,7 @@ public class HistoryTicketCalculate {
         System.out.println("====================================");
         System.out.println(String.format("汇总统计情况, 预测深度=%d 预测次数=%d, 基本命中=%d, 全部命中=%d, 基本概率=%s, 全部概率=%s",
                 calculateDepth, actualCalculateCount, basicOk, allOk, basicChance+"", allChance+""));
+        System.out.println("位置=" + hitPosition + ", 偏移量=" + shiftCount);
     }
 
     /*计算每种组合的开始最大出现数*/
@@ -212,7 +227,7 @@ public class HistoryTicketCalculate {
                     maxCountContent.indexOf("反") != -1 ? "正" + MathStack.hMap.get(maxTicketIdStr) : "反" + MathStack.tMap.get(maxTicketIdStr),
                     allSet, otherChoice);
             //if (Integer.valueOf(maxTicketIdStr) % 2 == 1) {//组合序号是双数
-                System.out.println(choiceContent);
+            System.out.println(choiceContent);
             //}
         } else {
             System.out.println("无预测的内容");
@@ -228,11 +243,12 @@ public class HistoryTicketCalculate {
         }
         String nowAnimal = getHitResult(futureTicketData);//当前的出的生肖
         //if (Integer.valueOf(maxTicketIdStr) % 2 == 1) {//组合序号是双数
-            System.out.println(futureTicketData.getPeriodNum() + "出=" + nowAnimal +
-                    ", 预测命中=" + maxSet.contains(nowAnimal) + ", 全部命中=" + allSet.contains(nowAnimal) +
-                    ", 生肖个数=" + futureTicketData.getAllAnimalSet().size() + ", 生肖详情=" + futureTicketData.getAllAnimalSet() +
-                    ", 相同的生肖=" + commonSet);
+        System.out.println(futureTicketData.getPeriodNum() + "出=" + nowAnimal +
+                ", 预测命中=" + maxSet.contains(nowAnimal) + ", 全部命中=" + allSet.contains(nowAnimal) +
+                ", 生肖个数=" + futureTicketData.getAllAnimalSet().size() + ", 生肖详情=" + futureTicketData.getAllAnimalSet() +
+                ", 相同的生肖=" + commonSet);
         //}
+        historyResultMap.put(futureTicketData.getPeriodNum().toString(), maxSet.contains(nowAnimal));
         if (maxSet.contains(nowAnimal)) {
             basicOk ++;
         }
@@ -263,83 +279,83 @@ public class HistoryTicketCalculate {
         String resulttemp = "";
         int resultcount = 1;
         String nowAnimal = "";//当前的出的生肖
-       for (int i = 0; i < historyTicketDatas.size(); i ++) {
-           nowAnimal = getHitResult(historyTicketDatas.get(i));
-           excelRow = sheet.createRow(row);
-           row++;
-           // 设置 id
-           cell = excelRow.createCell(0);
-           cell.setCellValue(historyTicketDatas.get(i).getId());
-           // 设置 id
-           cell = excelRow.createCell(1);
-           cell.setCellValue(historyTicketDatas.get(i).getPeriodNum());
-           // 设置 id
-           cell = excelRow.createCell(2);
-           if (paramSet.contains(nowAnimal)) {
-               if ("正".equals(resulttemp)) {
-                   resultcount ++;
-                   if (resultcount >= 2) {
-                       for (int j = 2; j <= resultcount; j ++) {
-                           sheet.getRow(row - j).getCell(2).setCellValue("正" + resultcount);
-                           sheet.getRow(row - j).getCell(3).setCellValue("正");
-                           sheet.getRow(row - j).getCell(4).setCellValue(resultcount+"");
-                       }
-                   }
-                   cell.setCellValue("正" + resultcount);
-                   cell = excelRow.createCell(3);
-                   cell.setCellValue("正");
-                   cell = excelRow.createCell(4);
-                   cell.setCellValue(resultcount+"");
-               } else {
-                   resultcount = 1;
-                   cell.setCellValue("正" + resultcount);
-                   cell = excelRow.createCell(3);
-                   cell.setCellValue("正");
-                   cell = excelRow.createCell(4);
-                   cell.setCellValue(resultcount+"");
-                   resulttemp = "正";
-               }
-           } else {
-               if ("反".equals(resulttemp)) {
-                   resultcount ++;
-                   if (resultcount >= 2) {
-                       for (int j = 2; j <= resultcount; j ++) {
-                           sheet.getRow(row - j).getCell(2).setCellValue("反" + resultcount);
-                           sheet.getRow(row - j).getCell(3).setCellValue("反");
-                           sheet.getRow(row - j).getCell(4).setCellValue(resultcount+"");
-                       }
-                   }
-                   cell.setCellValue("反" + resultcount);
-                   cell = excelRow.createCell(3);
-                   cell.setCellValue("反");
-                   cell = excelRow.createCell(4);
-                   cell.setCellValue(resultcount+"");
-               } else {
-                   resultcount = 1;
-                   cell.setCellValue("反" + resultcount);
-                   cell = excelRow.createCell(3);
-                   cell.setCellValue("反");
-                   cell = excelRow.createCell(4);
-                   cell.setCellValue(resultcount+"");
-                   resulttemp = "反";
-               }
-           }
-           if (lxtemp.equals(nowAnimal)) {
-               lxcount ++;
-               if (lxcount >= 2) {
-                   for (int j = 2; j <= lxcount; j ++) {
-                       sheet.getRow(row - j).getCell(5).setCellValue("连续" + nowAnimal + lxcount);
-                   }
-               }
-               cell = excelRow.createCell(5);
-               cell.setCellValue("连续" + nowAnimal + lxcount);
-           } else {
-               lxtemp = nowAnimal;
-               lxcount = 1;
-               cell = excelRow.createCell(5);
-               cell.setCellValue("");
-           }
-       }
+        for (int i = 0; i < historyTicketDatas.size(); i ++) {
+            nowAnimal = getHitResult(historyTicketDatas.get(i));
+            excelRow = sheet.createRow(row);
+            row++;
+            // 设置 id
+            cell = excelRow.createCell(0);
+            cell.setCellValue(historyTicketDatas.get(i).getId());
+            // 设置 id
+            cell = excelRow.createCell(1);
+            cell.setCellValue(historyTicketDatas.get(i).getPeriodNum());
+            // 设置 id
+            cell = excelRow.createCell(2);
+            if (paramSet.contains(nowAnimal)) {
+                if ("正".equals(resulttemp)) {
+                    resultcount ++;
+                    if (resultcount >= 2) {
+                        for (int j = 2; j <= resultcount; j ++) {
+                            sheet.getRow(row - j).getCell(2).setCellValue("正" + resultcount);
+                            sheet.getRow(row - j).getCell(3).setCellValue("正");
+                            sheet.getRow(row - j).getCell(4).setCellValue(resultcount+"");
+                        }
+                    }
+                    cell.setCellValue("正" + resultcount);
+                    cell = excelRow.createCell(3);
+                    cell.setCellValue("正");
+                    cell = excelRow.createCell(4);
+                    cell.setCellValue(resultcount+"");
+                } else {
+                    resultcount = 1;
+                    cell.setCellValue("正" + resultcount);
+                    cell = excelRow.createCell(3);
+                    cell.setCellValue("正");
+                    cell = excelRow.createCell(4);
+                    cell.setCellValue(resultcount+"");
+                    resulttemp = "正";
+                }
+            } else {
+                if ("反".equals(resulttemp)) {
+                    resultcount ++;
+                    if (resultcount >= 2) {
+                        for (int j = 2; j <= resultcount; j ++) {
+                            sheet.getRow(row - j).getCell(2).setCellValue("反" + resultcount);
+                            sheet.getRow(row - j).getCell(3).setCellValue("反");
+                            sheet.getRow(row - j).getCell(4).setCellValue(resultcount+"");
+                        }
+                    }
+                    cell.setCellValue("反" + resultcount);
+                    cell = excelRow.createCell(3);
+                    cell.setCellValue("反");
+                    cell = excelRow.createCell(4);
+                    cell.setCellValue(resultcount+"");
+                } else {
+                    resultcount = 1;
+                    cell.setCellValue("反" + resultcount);
+                    cell = excelRow.createCell(3);
+                    cell.setCellValue("反");
+                    cell = excelRow.createCell(4);
+                    cell.setCellValue(resultcount+"");
+                    resulttemp = "反";
+                }
+            }
+            if (lxtemp.equals(nowAnimal)) {
+                lxcount ++;
+                if (lxcount >= 2) {
+                    for (int j = 2; j <= lxcount; j ++) {
+                        sheet.getRow(row - j).getCell(5).setCellValue("连续" + nowAnimal + lxcount);
+                    }
+                }
+                cell = excelRow.createCell(5);
+                cell.setCellValue("连续" + nowAnimal + lxcount);
+            } else {
+                lxtemp = nowAnimal;
+                lxcount = 1;
+                cell = excelRow.createCell(5);
+                cell.setCellValue("");
+            }
+        }
         File file = new File("C:\\Users\\liuhp\\Desktop\\ticket\\calculate\\" +num );
         if (!file.exists()) {
             file.mkdir();
