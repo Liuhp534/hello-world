@@ -35,6 +35,8 @@ public class HistoryTicketCalculate {
 
     static Map<String, Boolean> historyResultMap = null;
 
+    static boolean printDetail = Boolean.TRUE;//打印预测详情
+
     static int shiftCount = 4;
 
     static int hitPosition = 7;//命中的位置1-7
@@ -78,7 +80,7 @@ public class HistoryTicketCalculate {
             JdbcUtils.repeatAllData();//先修复所有数据正常态
             //createExcelFlag = Boolean.TRUE;
             historyResultMap = new HashMap<>();//预测结果
-            multiple(2018001, Integer.MAX_VALUE, 6 + shiftCount);
+            multiple(2016001, Integer.MAX_VALUE, 6 + shiftCount);
             JdbcUtils.repeatAllData();//先修复所有数据正常态
             System.out.println("耗时=" + (System.currentTimeMillis() - start));
         } catch (Exception e) {
@@ -91,8 +93,10 @@ public class HistoryTicketCalculate {
         TicketData futureTicketData = null;
         int actualCalculateCount = 0;
         for (int i = 0; i < calculateCount; i ++) {
-            System.out.println("                              ||                   ||                              ");
-            System.out.println("                              ||  " + startPeriodNum + " ||                              ");
+            if (printDetail) {
+                System.out.println("                              ||                   ||                              ");
+                System.out.println("                              ||  " + startPeriodNum + " ||                              ");
+            }
             //比如预测2019059，那么包含这期的之后的都是deleted=1，首先执行update语句
             JdbcUtils.updateByPeriodNumToDeleted(startPeriodNum);
             //获取预测的数据
@@ -115,8 +119,10 @@ public class HistoryTicketCalculate {
                 break;
             }
             startPeriodNum = futureTicketData.getPeriodNum();
-            System.out.println("                              ||                   ||                              ");
-            System.out.println("                              ||                   ||                              ");
+            if (printDetail) {
+                System.out.println("                              ||                   ||                              ");
+                System.out.println("                              ||                   ||                              ");
+            }
         }
         BigDecimal basicDecimal = new BigDecimal(basicOk);
         BigDecimal allDecimal = new BigDecimal(allOk);
@@ -221,13 +227,15 @@ public class HistoryTicketCalculate {
                     otherChoice.add(temp);
                 }
             }
-            //拼接预测文案
-            String choiceContent = String.format("组合序号为=%s, 单双=%s，出现次数为=%s，对应的组合详情为=正%s 反%s，选择=%s, 综合选择=%s, 范围选择=%s",
-                    maxTicketIdStr, hort ? "双" : "单", maxCountContent, MathStack.hMap.get(maxTicketIdStr), MathStack.tMap.get(maxTicketIdStr),
-                    maxCountContent.indexOf("反") != -1 ? "正" + MathStack.hMap.get(maxTicketIdStr) : "反" + MathStack.tMap.get(maxTicketIdStr),
-                    allSet, otherChoice);
-            //if (Integer.valueOf(maxTicketIdStr) % 2 == 1) {//组合序号是双数
-            System.out.println(choiceContent);
+            if (printDetail) {
+                //拼接预测文案
+                String choiceContent = String.format("组合序号为=%s, 单双=%s，出现次数为=%s，对应的组合详情为=正%s 反%s，选择=%s, 综合选择=%s, 范围选择=%s",
+                        maxTicketIdStr, hort ? "双" : "单", maxCountContent, MathStack.hMap.get(maxTicketIdStr), MathStack.tMap.get(maxTicketIdStr),
+                        maxCountContent.indexOf("反") != -1 ? "正" + MathStack.hMap.get(maxTicketIdStr) : "反" + MathStack.tMap.get(maxTicketIdStr),
+                        allSet, otherChoice);
+                //if (Integer.valueOf(maxTicketIdStr) % 2 == 1) {//组合序号是双数
+                System.out.println(choiceContent);
+            }
             //}
         } else {
             System.out.println("无预测的内容");
@@ -243,10 +251,12 @@ public class HistoryTicketCalculate {
         }
         String nowAnimal = getHitResult(futureTicketData);//当前的出的生肖
         //if (Integer.valueOf(maxTicketIdStr) % 2 == 1) {//组合序号是双数
-        System.out.println(futureTicketData.getPeriodNum() + "出=" + nowAnimal +
-                ", 预测命中=" + maxSet.contains(nowAnimal) + ", 全部命中=" + allSet.contains(nowAnimal) +
-                ", 生肖个数=" + futureTicketData.getAllAnimalSet().size() + ", 生肖详情=" + futureTicketData.getAllAnimalSet() +
-                ", 相同的生肖=" + commonSet);
+        if (printDetail) {
+            System.out.println(futureTicketData.getPeriodNum() + "出=" + nowAnimal +
+                    ", 预测命中=" + maxSet.contains(nowAnimal) + ", 全部命中=" + allSet.contains(nowAnimal) +
+                    ", 生肖个数=" + futureTicketData.getAllAnimalSet().size() + ", 生肖详情=" + futureTicketData.getAllAnimalSet() +
+                    ", 相同的生肖=" + commonSet);
+        }
         //}
         historyResultMap.put(futureTicketData.getPeriodNum().toString(), maxSet.contains(nowAnimal));
         if (maxSet.contains(nowAnimal)) {

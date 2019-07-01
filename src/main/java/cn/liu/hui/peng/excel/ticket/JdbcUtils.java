@@ -202,7 +202,7 @@ public class JdbcUtils {
         List<TicketData> ticketDatas = new ArrayList<>();
         TicketData ticketData = null;
         Connection conn = getConn();
-        String sql = "select * from ticket_data where create_time >= '2017-01-01' and deleted=0 order by period_num desc ";
+        String sql = "select * from ticket_data where create_time >= '2016-01-01' and deleted=0 order by period_num desc ";
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -223,7 +223,7 @@ public class JdbcUtils {
                 ticketData.setSpecial(rs.getString(10));
                 ticketDatas.add(ticketData);
             }
-            System.out.println("=============获取历史数据数据总量=" +  ticketDatas.size()+ "===============");
+            //System.out.println("=============获取历史数据数据总量=" +  ticketDatas.size()+ "===============");
             //System.out.println("=============获取历史数据数据结束===============");
         } catch (SQLException e) {
             e.printStackTrace();

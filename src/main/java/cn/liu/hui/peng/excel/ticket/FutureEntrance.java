@@ -16,11 +16,11 @@ public class FutureEntrance {
     }
 
     private static void positionPrint() {
-        String dataYearStart= "2018-01-01";
+        String dataYearStart= "2017-01-01";
         boolean increasePeriodPrintFlag = true;
         boolean increasePeriodCountPrintFlag = false;
         boolean increasePeriodDetail = false;
-        allState(dataYearStart,0, 3, "", increasePeriodPrintFlag, increasePeriodCountPrintFlag, increasePeriodDetail);
+        allState(dataYearStart,4, 3, "", increasePeriodPrintFlag, increasePeriodCountPrintFlag, increasePeriodDetail);
     }
 
     private static void allPrint() {

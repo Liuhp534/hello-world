@@ -303,6 +303,7 @@ public class RecordHistorySeries {
         //输出汇总结果
         if (increasePeriodPrintFlag) {
             //获取预测结果
+            HistoryTicketCalculate.printDetail = Boolean.FALSE;//控制打印详情
             HistoryTicketCalculate.shiftCount = shiftCount;
             HistoryTicketCalculate.hitPosition = hitPosition;//命中的位置1-7
             HistoryTicketCalculate.historyCalculate();
