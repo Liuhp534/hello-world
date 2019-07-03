@@ -10,11 +10,11 @@ public class NumberFuturnEntrance {
 
     public static void main(String[] args) {
         String printPeriodNum = "2019073";
-        //allState(5, 7, printPeriodNum);
+        allState(8, 6, printPeriodNum);
         //fixPosition(printPeriodNum);
         //0-11, 0的组合=5200300， 6=177100=24秒，7=53130=6秒，一般7以上
         //偏移量//0-11，0表示排除23or24个, 1表示21or22, 5表示13or14, 6表示11or12, 7表示9or10, 8表示7or8, 9表示5or6
-        fixShiftCount(8, printPeriodNum);
+        //fixShiftCount(8, printPeriodNum);
     }
 
     /*
@@ -49,8 +49,8 @@ public class NumberFuturnEntrance {
      * */
     private static void allState(int shiftCount, int hitPosition, String printPeriodNum) {
         try {
-            NumberRecordHistorySeries.increasePeriodCountPrintFlag = Boolean.TRUE;//记录期数的汇总情况，将范围内的汇合到一起，并且按照最大的优先排序
-            NumberRecordHistorySeries.increasePeriodDetail = Boolean.TRUE;//默认执行操作,是否打印范围汇合详情
+            NumberRecordHistorySeries.increasePeriodCountPrintFlag = Boolean.FALSE;//记录期数的汇总情况，将范围内的汇合到一起，并且按照最大的优先排序
+            NumberRecordHistorySeries.increasePeriodDetail = Boolean.FALSE;//默认执行操作,是否打印范围汇合详情
             //偏移量//0-11，0表示排除23or24个, 1表示21or22, 6表示11or12, 7表示9or10, 8表示7or8, 9表示5or6
             NumberRecordHistorySeries.shiftCount = shiftCount;
             NumberRecordHistorySeries.hitPosition = hitPosition;//命中的位置1-7

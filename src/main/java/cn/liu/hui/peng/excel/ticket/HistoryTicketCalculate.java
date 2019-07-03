@@ -70,8 +70,8 @@ public class HistoryTicketCalculate {
     }
 
     /*
-    * 预测
-    * */
+     * 预测
+     * */
     public static void historyCalculate() {
         try {
             //预测开始期数2019059，预测期数2（没有那么多预测时退出）,预测深度就连续出现的阈值6
@@ -80,7 +80,7 @@ public class HistoryTicketCalculate {
             JdbcUtils.repeatAllData();//先修复所有数据正常态
             //createExcelFlag = Boolean.TRUE;
             historyResultMap = new HashMap<>();//预测结果
-            multiple(2016001, Integer.MAX_VALUE, 6 + shiftCount);
+            multiple(2018001, Integer.MAX_VALUE, 6 + shiftCount);
             JdbcUtils.repeatAllData();//先修复所有数据正常态
             System.out.println("耗时=" + (System.currentTimeMillis() - start));
         } catch (Exception e) {

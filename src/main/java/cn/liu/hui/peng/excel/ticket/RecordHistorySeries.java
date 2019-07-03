@@ -326,7 +326,7 @@ public class RecordHistorySeries {
                     printCount = Integer.valueOf(maxDetail.split("_")[1]);
                     for (int k = 0; k < printCount; k ++) {
                         printCountTemp += "---";
-                        if (k == 8) {
+                        if (k == 6) {
                             printCountTemp += "|";
                         }
                     }

@@ -59,6 +59,12 @@ public class JdbcUtils {
                 ticketData = new TicketData();
                 ticketData.setId(rs.getInt(1));
                 ticketData.setPeriodNum(rs.getInt(2));
+                ticketData.setPosition1(rs.getString(4));
+                ticketData.setPosition2(rs.getString(5));
+                ticketData.setPosition3(rs.getString(6));
+                ticketData.setPosition4(rs.getString(7));
+                ticketData.setPosition5(rs.getString(8));
+                ticketData.setPosition6(rs.getString(9));
                 ticketData.setSpecial(rs.getString(10));
                 ticketDatas.add(ticketData);
             }
@@ -202,7 +208,7 @@ public class JdbcUtils {
         List<TicketData> ticketDatas = new ArrayList<>();
         TicketData ticketData = null;
         Connection conn = getConn();
-        String sql = "select * from ticket_data where create_time >= '2016-01-01' and deleted=0 order by period_num desc ";
+        String sql = "select * from ticket_data where create_time >= '2018-01-01' and deleted=0 order by period_num desc ";
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
