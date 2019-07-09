@@ -306,6 +306,7 @@ public class RecordHistorySeries {
             HistoryTicketCalculate.printDetail = Boolean.FALSE;//控制打印详情
             HistoryTicketCalculate.shiftCount = shiftCount;
             HistoryTicketCalculate.hitPosition = hitPosition;//命中的位置1-7
+            HistoryTicketCalculate.commonCountTicketMap = new LinkedHashMap<>();
             HistoryTicketCalculate.historyCalculate();
             String result = "";//关键数据字段
             Set<String> hValueSet = null;//指向选择的结果

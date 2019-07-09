@@ -1,6 +1,8 @@
 package cn.liu.hui.peng.excel;
 
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,6 +37,10 @@ public class TicketData {
     private String createTime;
 
     private Set<String> allAnimalSet = new LinkedHashSet<>();
+
+    private List<String> allAnimalList = new LinkedList<>();
+
+    private Set<String> allNumberSet = new LinkedHashSet<>();
 
     public Integer getPeriodNum() {
         return periodNum;
@@ -141,6 +147,28 @@ public class TicketData {
         allAnimalSet.add(this.position6);
         allAnimalSet.add(this.special);
         return allAnimalSet;
+    }
+
+    public List<String> getAllAnimalList() {
+        allAnimalList.add(this.position1);
+        allAnimalList.add(this.position2);
+        allAnimalList.add(this.position3);
+        allAnimalList.add(this.position4);
+        allAnimalList.add(this.position5);
+        allAnimalList.add(this.position6);
+        allAnimalSet.add(this.special);
+        return allAnimalList;
+    }
+
+    public Set<String> getAllNumberSet() {
+        allNumberSet.add(this.position1);
+        allNumberSet.add(this.position2);
+        allNumberSet.add(this.position3);
+        allNumberSet.add(this.position4);
+        allNumberSet.add(this.position5);
+        allNumberSet.add(this.position6);
+        //allAnimalSet.add(this.special);
+        return allNumberSet;
     }
 
     public void setAllAnimalSet(Set<String> allAnimalSet) {

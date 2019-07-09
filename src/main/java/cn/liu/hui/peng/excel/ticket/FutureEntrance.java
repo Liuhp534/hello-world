@@ -20,11 +20,11 @@ public class FutureEntrance {
         boolean increasePeriodPrintFlag = true;
         boolean increasePeriodCountPrintFlag = false;
         boolean increasePeriodDetail = false;
-        allState(dataYearStart,0, 5, "", increasePeriodPrintFlag, increasePeriodCountPrintFlag, increasePeriodDetail);
+        allState(dataYearStart,0, 7, "", increasePeriodPrintFlag, increasePeriodCountPrintFlag, increasePeriodDetail);
     }
 
     private static void allPrint() {
-        String printPeriodNum = "2019073";
+        String printPeriodNum = "2019075";
         String dataYearStart= "2018-01-01";
         fixPosition(dataYearStart, printPeriodNum);
     }

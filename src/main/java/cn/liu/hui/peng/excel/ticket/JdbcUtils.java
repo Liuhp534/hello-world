@@ -208,7 +208,7 @@ public class JdbcUtils {
         List<TicketData> ticketDatas = new ArrayList<>();
         TicketData ticketData = null;
         Connection conn = getConn();
-        String sql = "select * from ticket_data where create_time >= '2018-01-01' and deleted=0 order by period_num desc ";
+        String sql = "select * from ticket_data where create_time >= '2008-01-01' and deleted=0 order by period_num desc limit 28 ";
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
